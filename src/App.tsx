@@ -44,9 +44,21 @@ const WhatsappIcon = (props: any) => (
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Prevent scrolling when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   return (
     <nav className="fixed top-0 left-0 w-full z-50 glass border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between relative z-50">
         <div className="flex items-center gap-3 group cursor-pointer">
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 5 }}
@@ -84,41 +96,69 @@ const Navbar = () => {
           </a>
         </div>
 
-        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X /> : <Menu />}
+        <button 
+          className="md:hidden text-white p-2 -mr-2 relative z-50" 
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle menu"
+        >
+          <motion.div
+            animate={{ rotate: isOpen ? 90 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </motion.div>
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden bg-white/90 backdrop-blur-2xl absolute top-20 left-0 w-full p-6 flex flex-col gap-4 border-b border-white/20 shadow-2xl"
-          >
-            {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
-              <a 
-                key={item} 
-                href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                className="text-lg font-medium text-black/80 hover:text-[#008080] transition-colors"
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-40 md:hidden"
+              onClick={() => setIsOpen(false)}
+            />
+            
+            {/* Menu Content */}
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden fixed top-20 left-0 w-full bg-[#0a0a0a]/95 backdrop-blur-2xl p-6 flex flex-col gap-2 border-b border-white/10 shadow-2xl z-40"
+            >
+              {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item, i) => (
+                <motion.a 
+                  key={item} 
+                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 + 0.1, duration: 0.3 }}
+                  className="text-xl font-medium text-white/80 hover:text-[#00ffff] transition-colors py-3 border-b border-white/5"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item}
+                </motion.a>
+              ))}
+              <motion.a 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.3 }}
+                href="https://wa.me/573218210894"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-4 mt-6 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-xl shadow-[0_0_20px_rgba(0,128,128,0.3)] text-center transition-all"
                 onClick={() => setIsOpen(false)}
               >
-                {item}
-              </a>
-            ))}
-            <a 
-              href="https://wa.me/573218210894"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-3 bg-[#008080] text-white font-bold rounded-xl shadow-lg shadow-teal-500/20 text-center"
-              onClick={() => setIsOpen(false)}
-            >
-              Book Now
-            </a>
-          </motion.div>
+                Book Now
+              </motion.a>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>
