@@ -392,21 +392,9 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
 
   // Always play video on mount
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = true;
-    video.setAttribute('muted', '');
-    video.setAttribute('playsinline', '');
-    video.setAttribute('webkit-playsinline', '');
-    const playVideo = () => {
-      video.play().catch(() => {});
-    };
-    if (video.readyState >= 2) {
-      playVideo();
-    } else {
-      video.addEventListener('canplay', playVideo, { once: true });
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
     }
-    return () => video.removeEventListener('canplay', playVideo);
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -460,17 +448,15 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
         {s.video ? (
           <motion.video
             ref={videoRef}
+            src={s.video}
             className="absolute inset-0 w-full h-full object-cover"
             style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
             muted
             loop
             playsInline
-            autoPlay
-            preload="metadata"
-          >
-            <source src={s.video.replace('.webm', '.mp4')} type="video/mp4" />
-            <source src={s.video} type="video/webm" />
-          </motion.video>
+            autoPlay={true}
+            preload="auto"
+          />
         ) : (
           <motion.img 
             src={s.gif ? s.gif : s.image} 
