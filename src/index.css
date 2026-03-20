@@ -14,6 +14,8 @@
 @layer base {
   body {
     @apply bg-brand-dark text-white font-sans antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
   }
 }
 
@@ -100,4 +102,15 @@
   border-radius: 50%;
   transform: rotate(-45deg);
   pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
