@@ -24,6 +24,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
+import { Chatbot } from './components/Chatbot';
+
 const WhatsappIcon = (props: any) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -341,26 +343,18 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Mobile scroll trigger
+  // Use static values on mobile to avoid expensive calculations
+  const finalRotateX = isMobile ? 0 : rotateX;
+  const finalRotateY = isMobile ? 0 : rotateY;
+  const finalTranslateX = isMobile ? 0 : translateX;
+  const finalTranslateY = isMobile ? 0 : translateY;
+  const finalScale = isMobile ? 1 : scaleSpring;
+
+  // Always play video on mount
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (videoRef.current) {
-            if (entry.isIntersecting) {
-              videoRef.current.play().catch(() => {});
-            }
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
     }
-
-    return () => observer.disconnect();
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -388,9 +382,6 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     if (isMobile) return;
     setIsHovered(true);
     scale.set(1.1);
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
   };
 
   return (
@@ -407,14 +398,19 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     >
       <motion.div 
         className="relative h-80 rounded-3xl overflow-hidden mb-6"
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        style={{ 
+          rotateX: finalRotateX, 
+          rotateY: finalRotateY, 
+          transformStyle: isMobile ? "flat" : "preserve-3d",
+          willChange: "transform"
+        }}
       >
         {s.video ? (
           <motion.video
             ref={videoRef}
             src={s.video}
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ x: translateX, y: translateY, scale: scaleSpring }}
+            style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
             muted
             loop
             playsInline
@@ -426,10 +422,10 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
             src={s.gif ? s.gif : s.image} 
             alt={s.title} 
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ x: translateX, y: translateY, scale: scaleSpring }}
+            style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
             referrerPolicy="no-referrer"
-            fetchPriority={i < 4 ? "high" : "auto"}
-            loading={i < 4 ? "eager" : "lazy"}
+            fetchPriority="high"
+            loading="eager"
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-60 pointer-events-none" />
@@ -1300,6 +1296,7 @@ export default function App() {
         <CTA />
       </main>
       <Footer />
+      <Chatbot />
     </div>
   );
 }
