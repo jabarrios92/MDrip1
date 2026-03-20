@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
 import { 
   Droplets, 
@@ -24,7 +24,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-import { Chatbot } from './components/Chatbot';
+const Chatbot = React.lazy(() => import('./components/Chatbot'));
 
 const WhatsappIcon = (props: any) => (
   <svg
@@ -166,7 +166,7 @@ const Navbar = () => {
 };
 
 const Hero = () => {
-  const { scrollYProgress } = useScroll();
+  const { scrollYProgress } = useScroll({ layoutEffect: false } as any);
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 40, damping: 15, restDelta: 0.001 });
   
   const bgY = useTransform(smoothProgress, [0, 1], ["0%", "50%"]);
@@ -264,7 +264,7 @@ const Hero = () => {
             Book Now
           </a>
           <a 
-            href="#about"
+            href="#how-it-works"
             className="w-full sm:w-auto px-10 py-4 glass hover:bg-white/10 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)] hover:border-[#00ffff]/50 hover:text-[#00ffff] text-white font-bold rounded-full transition-all duration-300 text-lg text-center"
           >
             How it Works
@@ -1336,7 +1336,9 @@ export default function App() {
         <CTA />
       </main>
       <Footer />
-      <Chatbot />
+      <Suspense fallback={null}>
+        <Chatbot />
+      </Suspense>
     </div>
   );
 }

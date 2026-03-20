@@ -54,7 +54,7 @@ export const Chatbot = () => {
       }));
 
       const chat = ai.chats.create({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.0-flash',
         config: {
           systemInstruction: `You are a helpful customer service assistant for MDrip, a premium IV Therapy service based in Medellín, Colombia. 
           MDrip provides physician-led medical care in the comfort of the customer's accommodation (Airbnb, hotel, or home).
@@ -76,7 +76,7 @@ export const Chatbot = () => {
       const contextPrompt = `Previous conversation:\n${messages.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nUser: ${userMessage.content}`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.0-flash',
         contents: contextPrompt,
         config: {
           systemInstruction: `You are a helpful customer service assistant for MDrip, a premium IV Therapy service based in Medellín, Colombia. 
@@ -208,3 +208,5 @@ export const Chatbot = () => {
     </>
   );
 };
+
+export default Chatbot;
