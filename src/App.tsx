@@ -448,7 +448,6 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
         {s.video ? (
           <motion.video
             ref={videoRef}
-            src={s.video}
             className="absolute inset-0 w-full h-full object-cover"
             style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
             muted
@@ -456,7 +455,10 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
             playsInline
             autoPlay={true}
             preload="auto"
-          />
+          >
+            <source src={s.video.replace('.webm', '.mp4')} type="video/mp4" />
+            <source src={s.video} type="video/webm" />
+          </motion.video>
         ) : (
           <motion.img 
             src={s.gif ? s.gif : s.image} 
