@@ -393,6 +393,7 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
   // Always play video on mount
   useEffect(() => {
     if (videoRef.current) {
+      videoRef.current.muted = true;
       videoRef.current.play().catch(() => {});
     }
   }, []);
@@ -450,9 +451,10 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
             ref={videoRef}
             className="absolute inset-0 w-full h-full object-cover"
             style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
-            muted
+            muted={true}
             loop
             playsInline
+            webkit-playsinline="true"
             autoPlay={true}
             preload="auto"
           >
