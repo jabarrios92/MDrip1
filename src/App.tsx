@@ -45,7 +45,7 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 w-full z-50 glass border-b border-white/5">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-3 group cursor-pointer">
+        <a href="#home" className="flex items-center gap-3 group cursor-pointer">
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 5 }}
             className="relative h-14 w-14 flex items-center justify-center"
@@ -60,10 +60,10 @@ const Navbar = () => {
             />
           </motion.div>
           <span className="text-2xl font-bold tracking-tighter text-gradient hidden sm:block group-hover:brightness-125 transition-all">MDRIP</span>
-        </div>
+        </a>
 
         <div className="hidden md:flex items-center gap-8">
-          {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
+          {['Home', 'Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
             <a 
               key={item} 
               href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
@@ -97,7 +97,7 @@ const Navbar = () => {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="md:hidden bg-white/90 backdrop-blur-2xl absolute top-20 left-0 w-full p-6 flex flex-col gap-4 border-b border-white/20 shadow-2xl"
           >
-            {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
+            {['Home', 'Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
               <a 
                 key={item} 
                 href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
@@ -135,7 +135,7 @@ const Hero = () => {
   const logoY = useTransform(smoothProgress, [0, 0.3], [0, 50]);
 
   return (
-    <section className="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden">
       {/* Parallax Background */}
       <motion.div 
         style={{ y: bgY }}
@@ -312,9 +312,8 @@ const Features = () => {
   );
 };
 
-const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
+const ServiceCard: React.FC<{ s: any, i: number, isExpanded: boolean, onToggle: () => void }> = ({ s, i, isExpanded, onToggle }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const cardRef = React.useRef<HTMLDivElement>(null);
   
@@ -393,20 +392,41 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     }
   };
 
+  useEffect(() => {
+    if (isExpanded && cardRef.current) {
+      const timer = setTimeout(() => {
+        cardRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isExpanded]);
+
   return (
     <motion.div 
       ref={cardRef}
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true, margin: "-100px" }}
-      className="group cursor-pointer"
+      whileHover={{ 
+        scale: 1.02,
+        boxShadow: "0 0 40px rgba(0, 255, 255, 0.05)"
+      }}
+      className={`group cursor-pointer p-4 rounded-[2.5rem] border transition-all duration-500 backdrop-blur-sm ${
+        isExpanded 
+          ? 'bg-white/[0.08] border-[#00ffff]/40 shadow-[0_0_50px_rgba(0,255,255,0.1)]' 
+          : 'bg-white/[0.03] border-white/10 hover:border-[#00ffff]/30'
+      }`}
+      onClick={onToggle}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{ perspective: 1000 }}
     >
       <motion.div 
-        className="relative h-80 rounded-3xl overflow-hidden mb-6"
+        className="relative h-72 rounded-3xl overflow-hidden mb-6"
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
       >
         {s.video ? (
@@ -565,32 +585,42 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
         ))}
       </div>
       
-      {isExpanded && s.description && (
-        <motion.p 
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="text-white/60 text-sm mb-4"
-        >
-          {s.description}
-        </motion.p>
-      )}
+      <AnimatePresence>
+        {isExpanded && s.description && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <p className="text-white/60 text-sm mb-6 leading-relaxed border-t border-white/5 pt-4">
+              {s.description}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-auto">
         <span className="text-2xl font-bold text-[#00ffff]">{s.price}</span>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
           {s.description && (
-            <button 
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-xs text-[#00ffff] underline"
+            <span 
+              className={`text-xs font-bold uppercase tracking-widest transition-colors duration-300 ${
+                isExpanded ? 'text-white' : 'text-[#00ffff] hover:text-white'
+              }`}
             >
-              {isExpanded ? 'See Less' : 'See More'}
-            </button>
+              {isExpanded ? 'Less' : 'More'}
+            </span>
           )}
           <motion.button 
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-[#00ffff] group-hover:border-[#00ffff] group-hover:text-black transition-all"
+            animate={{ 
+              rotate: isExpanded ? 90 : 0,
+              backgroundColor: isExpanded ? "#00ffff" : "rgba(255, 255, 255, 0.05)",
+              color: isExpanded ? "#000000" : "#ffffff"
+            }}
+            className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#00ffff]/50 transition-all"
           >
             <ChevronRight className="w-5 h-5" />
           </motion.button>
@@ -691,31 +721,32 @@ const AboutUs = () => {
 };
 
 const Services = () => {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const services = [
     {
       title: "Immunity Boost",
-      price: "$130",
+      price: "$130 USD",
       video: "/Animacionamarilla.webm",
       tags: ["Vitamin C", "Electrolytes", "Antioxidants"],
       description: "Strengthen your body’s natural defenses with a treatment centered around high-dose Vitamin C, a potent antioxidant known for its role in immune health, cellular protection, and inflammation reduction. Perfect for staying healthy during travel or when feeling run down."
     },
     {
       title: "The Hangover Cure",
-      price: "$120",
+      price: "$120 USD",
       video: "/Animacionazul.webm",
       tags: ["RINGER LACTATE", "B-Complex", "THIAMINE"],
       description: "Recover quickly from a night out with our specialized hangover treatment, designed to rehydrate, replenish nutrients, and soothe nausea."
     },
     {
       title: "Myers Cocktail",
-      price: "$135",
+      price: "$135 USD",
       video: "/Animacionverde.webm",
       tags: ["CALCIUM GLUCONATE", "B-COMPLEX", "VITAMIN C"],
       description: "Boost your overall wellness with a potent blend of Calcium Gluconate, B-Complex, and Vitamin C, designed to support energy levels, immune function, and overall health."
     },
     {
       title: "Ultra Recovery",
-      price: "$125",
+      price: "$125 USD",
       video: "/Animacionmorada.webm",
       tags: ["THIAMINE", "VITAMIN B2", "VITAMIN B6", "VITAMIN B12", "ELECTROLYTES", "RINGER LACTATE"],
       description: "Accelerate your recovery with a comprehensive blend of Thiamine, Vitamin B2, Vitamin B6, Vitamin B12, Electrolytes, and Ringer Lactate, designed to replenish essential nutrients and support optimal performance."
@@ -732,7 +763,13 @@ const Services = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((s, i) => (
-            <ServiceCard key={i} s={s} i={i} />
+            <ServiceCard 
+              key={i} 
+              s={s} 
+              i={i} 
+              isExpanded={expandedIndex === i}
+              onToggle={() => setExpandedIndex(expandedIndex === i ? null : i)}
+            />
           ))}
         </div>
       </div>
@@ -750,22 +787,22 @@ const HowItWorks = () => {
 
   const steps = [
     {
-      num: "01",
+      num: "1",
       title: "Choose Your Drip",
       desc: "Select the infusion that matches your needs from our curated menu. Our physicians will be there to guide you every step of the way."
     },
     {
-      num: "02",
+      num: "2",
       title: "Schedule a Time",
       desc: "Pick a time that works for you."
     },
     {
-      num: "03",
+      num: "3",
       title: "We Come to You",
       desc: "A certified physician will assess you at your location."
     },
     {
-      num: "04",
+      num: "4",
       title: "Feel Better",
       desc: "Relax and enjoy your treatment. Most sessions take 45-60 minutes."
     }
@@ -784,12 +821,25 @@ const HowItWorks = () => {
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  className="flex gap-6"
+                  whileHover="hover"
+                  className="flex gap-6 group cursor-pointer"
                 >
-                  <span className="text-4xl font-serif italic text-[#00ffff]/30 font-bold">{step.num}</span>
+                  <motion.span 
+                    variants={{
+                      hover: { 
+                        color: "#00ffff", 
+                        textShadow: "0 0 25px rgba(0, 255, 255, 0.8)",
+                        scale: 1.15,
+                        opacity: 1
+                      }
+                    }}
+                    className="text-4xl font-serif italic text-[#00ffff]/30 font-bold transition-all duration-500"
+                  >
+                    {step.num}
+                  </motion.span>
                   <div>
-                    <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                    <p className="text-white/50">{step.desc}</p>
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-[#00ffff] transition-colors duration-500">{step.title}</h3>
+                    <p className="text-white/50 group-hover:text-white/80 transition-colors duration-500">{step.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -1088,10 +1138,87 @@ const CTA = () => {
   );
 };
 
+const FAQItem = ({ faq, index, activeIndex, setActiveIndex }: { faq: any, index: number, activeIndex: number | null, setActiveIndex: (i: number | null) => void }) => {
+  const itemRef = React.useRef<HTMLDivElement>(null);
+  const isOpen = activeIndex === index;
+
+  useEffect(() => {
+    if (isOpen && itemRef.current) {
+      const timer = setTimeout(() => {
+        itemRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  return (
+    <motion.div
+      ref={itemRef}
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1 }}
+      whileHover={{ 
+        scale: 1.01,
+        borderColor: "rgba(0, 255, 255, 0.3)",
+        boxShadow: "0 0 30px rgba(0, 255, 255, 0.05)"
+      }}
+      className={`border rounded-2xl overflow-hidden backdrop-blur-sm transition-all duration-500 ${
+        isOpen 
+          ? 'bg-white/[0.08] border-[#00ffff]/40 shadow-[0_0_40px_rgba(0,255,255,0.1)]' 
+          : 'bg-white/[0.03] border-white/10'
+      }`}
+    >
+      <button
+        onClick={() => setActiveIndex(isOpen ? null : index)}
+        className="w-full px-6 py-6 text-left flex items-center justify-between group transition-all duration-500"
+      >
+        <span className={`font-semibold text-lg pr-8 transition-colors duration-500 ${
+          isOpen ? 'text-[#00ffff]' : 'text-white/80 group-hover:text-white'
+        }`}>
+          {faq.question}
+        </span>
+        <motion.div
+          animate={{ 
+            rotate: isOpen ? 90 : 0,
+            scale: isOpen ? 1.2 : 1,
+            color: isOpen ? "#00ffff" : "rgba(255, 255, 255, 0.4)"
+          }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#00ffff]/10 transition-colors"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </motion.div>
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="px-6 pb-6 text-white/60 leading-relaxed border-t border-white/5 pt-4 mx-6 mb-2">
+              {faq.answer}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
 const FAQ = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const faqs = [
+    {
+      question: "How do I know which drip is best for me?",
+      answer: "Our medical professionals are here to help. You can contact us via WhatsApp for a free pre-evaluation where our doctors will assess your condition and recommend the most suitable treatment for your needs."
+    },
     {
       question: "What is IV Therapy?",
       answer: "IV Therapy is a medical treatment that delivers fluids, vitamins, and minerals directly into your bloodstream. This bypasses the digestive system for 100% absorption and immediate results."
@@ -1129,41 +1256,13 @@ const FAQ = () => {
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.03] backdrop-blur-sm"
-            >
-              <button
-                onClick={() => setActiveIndex(activeIndex === index ? null : index)}
-                className="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-              >
-                <span className="font-semibold text-lg pr-8">{faq.question}</span>
-                <motion.div
-                  animate={{ rotate: activeIndex === index ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChevronRight className="w-5 h-5 text-[#00ffff]" />
-                </motion.div>
-              </button>
-              <AnimatePresence>
-                {activeIndex === index && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <div className="px-6 pb-6 text-white/60 leading-relaxed">
-                      {faq.answer}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+            <FAQItem 
+              key={index} 
+              faq={faq} 
+              index={index} 
+              activeIndex={activeIndex} 
+              setActiveIndex={setActiveIndex} 
+            />
           ))}
         </div>
       </div>
@@ -1171,7 +1270,7 @@ const FAQ = () => {
   );
 };
 
-const Footer = () => {
+const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') => void }) => {
   return (
     <footer id="contact" className="py-20 border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6">
@@ -1236,6 +1335,7 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-6">Quick Links</h4>
             <ul className="space-y-4 text-white/40">
+              <li><a href="#home" className="hover:text-white transition-colors">Home</a></li>
               <li><a href="#services" className="hover:text-white transition-colors">Drip Menu</a></li>
               <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
               <li><a href="#about-us" className="hover:text-white transition-colors">About Us</a></li>
@@ -1274,8 +1374,8 @@ const Footer = () => {
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/20 uppercase tracking-widest">
           <p>© 2026 MDRIP IV THERAPY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-8">
-            <a href="#" className="hover:text-white">Privacy Policy</a>
-            <a href="#" className="hover:text-white">Terms of Service</a>
+            <button onClick={() => onOpenPolicy('privacy')} className="hover:text-white transition-colors">Privacy Policy</button>
+            <button onClick={() => onOpenPolicy('terms')} className="hover:text-white transition-colors">Terms of Service</button>
           </div>
         </div>
       </div>
@@ -1287,6 +1387,8 @@ const Footer = () => {
 import { Chatbot } from './components/Chatbot';
 
 export default function App() {
+  const [policyType, setPolicyType] = useState<'privacy' | 'terms' | null>(null);
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       <Navbar />
@@ -1301,8 +1403,103 @@ export default function App() {
         <Feedback />
         <CTA />
       </main>
-      <Footer />
+      <Footer onOpenPolicy={(type) => setPolicyType(type)} />
       <Chatbot />
+      
+      <AnimatePresence>
+        {policyType && (
+          <PolicyModal type={policyType} onClose={() => setPolicyType(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+const PolicyModal: React.FC<{ type: 'privacy' | 'terms', onClose: () => void }> = ({ type, onClose }) => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl"
+    >
+      <motion.div 
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="bg-[#0d0d0d] border border-white/10 w-full max-w-4xl max-h-[80vh] rounded-[3rem] overflow-hidden flex flex-col shadow-2xl"
+      >
+        <div className="p-8 border-b border-white/10 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gradient">
+            {type === 'privacy' ? 'Privacy Policy' : 'Terms of Service'}
+          </h2>
+          <button 
+            onClick={onClose}
+            className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <div className="p-8 overflow-y-auto custom-scrollbar text-white/70 space-y-6">
+          {type === 'privacy' ? (
+            <>
+              <section>
+                <h3 className="text-white font-bold mb-3">1. Information We Collect</h3>
+                <p>We collect information you provide directly to us, such as when you book a session, sign up for our newsletter, or contact us for support. This may include your name, email address, phone number, and medical history relevant to IV therapy.</p>
+              </section>
+              <section>
+                <h3 className="text-white font-bold mb-3">2. How We Use Your Information</h3>
+                <p>We use the information we collect to provide, maintain, and improve our services, to process your bookings, and to communicate with you about your appointments and our services.</p>
+              </section>
+              <section>
+                <h3 className="text-white font-bold mb-3">3. Medical Confidentiality</h3>
+                <p>Your medical information is treated with the highest level of confidentiality. Our physicians follow strict protocols to ensure your health data is protected and only used for the purpose of providing safe medical care.</p>
+              </section>
+              <section>
+                <h3 className="text-white font-bold mb-3">4. Data Security</h3>
+                <p>We implement appropriate technical and organizational measures to protect the security of your personal information. However, please note that no method of transmission over the Internet is 100% secure.</p>
+              </section>
+              <section>
+                <h3 className="text-white font-bold mb-3">5. Contact Us</h3>
+                <p>If you have any questions about this Privacy Policy, please contact us at jabarrios92@gmail.com or via WhatsApp.</p>
+              </section>
+            </>
+          ) : (
+            <>
+              <section>
+                <h3 className="text-white font-bold mb-3">1. Acceptance of Terms</h3>
+                <p>By accessing or using MDRIP's services, you agree to be bound by these Terms of Service. If you do not agree to all of these terms, do not use our services.</p>
+              </section>
+              <section>
+                <h3 className="text-white font-bold mb-3">2. Medical Services</h3>
+                <p>MDRIP provides physician-led IV therapy. All treatments are subject to a medical evaluation by a licensed physician. We reserve the right to refuse service if a treatment is deemed unsafe or inappropriate for a client.</p>
+              </section>
+              <section>
+                <h3 className="text-white font-bold mb-3">3. Bookings and Cancellations</h3>
+                <p>Bookings are subject to availability. Cancellations made less than 2 hours before the scheduled appointment may be subject to a cancellation fee. Please notify us as soon as possible if you need to reschedule.</p>
+              </section>
+              <section>
+                <h3 className="text-white font-bold mb-3">4. Limitation of Liability</h3>
+                <p>To the maximum extent permitted by law, MDRIP shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues.</p>
+              </section>
+              <section>
+                <h3 className="text-white font-bold mb-3">5. Governing Law</h3>
+                <p>These terms shall be governed by and construed in accordance with the laws of Colombia, without regard to its conflict of law provisions.</p>
+              </section>
+            </>
+          )}
+        </div>
+        
+        <div className="p-8 border-t border-white/10 flex justify-end">
+          <button 
+            onClick={onClose}
+            className="px-8 py-3 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-2xl transition-all"
+          >
+            Close
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};

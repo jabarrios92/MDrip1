@@ -18,7 +18,7 @@ export default async function handler(req: any, res: any) {
     
     const ai = new GoogleGenAI({ apiKey });
     
-    let conversationContext = "You are a helpful customer service assistant for MDrip, a premium IV therapy service in Medellín. You help users with questions about services, pricing, and how it works. Keep answers concise, friendly, and professional.\n\n";
+    let conversationContext = "You are a helpful customer service assistant for MDrip, a premium IV therapy service in Medellín. You help users with questions about services, pricing, and how it works. Keep answers concise, friendly, and professional. IMPORTANT: All prices are in USD. If asked about prices, always specify they are in USD.\n\n";
     
     if (history && history.length > 0) {
       conversationContext += "Previous conversation:\n";
