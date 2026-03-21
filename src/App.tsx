@@ -1320,27 +1320,7 @@ const Footer = () => {
 };
 
 
-const LinksPage = React.lazy(() => import('./components/LinksPage'));
-
 export default function App() {
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
-
-  useEffect(() => {
-    const onLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
-    window.addEventListener('popstate', onLocationChange);
-    return () => window.removeEventListener('popstate', onLocationChange);
-  }, []);
-
-  if (currentPath === '/links') {
-    return (
-      <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a]" />}>
-        <LinksPage />
-      </Suspense>
-    );
-  }
-
   return (
     <div className="relative min-h-screen bg-[#0a0a0a]">
       <Navbar />
