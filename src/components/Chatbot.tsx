@@ -74,7 +74,7 @@ export const Chatbot = () => {
       }));
 
       const responseStream = await ai.models.generateContentStream({
-        model: "gemini-1.5-flash",
+        model: "gemini-flash-latest",
         contents: [
           ...chatHistory,
           { role: 'user', parts: [{ text: userMessage }] }
@@ -173,7 +173,7 @@ export const Chatbot = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">MDrip Assistant</h3>
-                  <p className="text-xs text-[#00ffff]">Online (v1.1)</p>
+                  <p className="text-xs text-[#00ffff]">Online (v1.2)</p>
                 </div>
               </div>
               <button 
