@@ -750,6 +750,7 @@ const PaymentMethods = () => {
     { name: "Cash", icon: <DollarSign className="w-6 h-6" />, desc: "USD or COP at current rate" },
     { name: "Bancolombia", icon: <CreditCard className="w-6 h-6" />, desc: "Direct bank transfer" },
     { name: "Nequi", icon: <Smartphone className="w-6 h-6" />, desc: "Instant mobile payment" },
+    { name: "Bre-B", icon: <Zap className="w-6 h-6" />, desc: "Instant bank transfer" },
     { name: "PayPal", icon: <Globe className="w-6 h-6" />, desc: "International credit cards" }
   ];
 
@@ -760,7 +761,7 @@ const PaymentMethods = () => {
           <h2 className="text-4xl md:text-5xl font-bold mb-4">Payment Methods</h2>
           <p className="text-white/50 max-w-xl mx-auto">Flexible options for your convenience.</p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {methods.map((m, i) => (
             <motion.div 
               key={i}
@@ -1279,7 +1280,7 @@ const FAQ = () => {
   const faqs = [
     {
       question: "What payment methods do you accept?",
-      answer: "We accept Cash (USD or COP), Bancolombia bank transfers, Nequi, and PayPal. Payment is typically made at the time of service."
+      answer: "We accept Cash (USD or COP), Bancolombia bank transfers, Nequi, Bre-B, and PayPal. Payment is typically made at the time of service."
     },
     {
       question: "How do I book a session?",

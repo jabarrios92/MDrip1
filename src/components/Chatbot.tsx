@@ -28,6 +28,7 @@ PAYMENT METHODS:
 - Cash (Efectivo)
 - Bancolombia Transfer
 - Nequi
+- Bre-B (Instant transfer)
 - PayPal
 
 IMPORTANT: All our base prices are in USD. 
