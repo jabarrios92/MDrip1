@@ -1284,6 +1284,8 @@ const Footer = () => {
 };
 
 
+import { Chatbot } from './components/Chatbot';
+
 export default function App() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
@@ -1300,6 +1302,7 @@ export default function App() {
         <CTA />
       </main>
       <Footer />
+      <Chatbot />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import { GoogleGenAI } from "@google/genai";
 
 dotenv.config();
 
@@ -10,6 +11,47 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // API Route for Chatbot
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { message, history } = req.body;
+      if (!message) return res.status(400).json({ error: "Message is required" });
+      
+      const apiKey = process.env.GEMINI_API_KEY?.trim();
+      console.log("API Key type:", typeof apiKey, "length:", apiKey?.length, "value:", apiKey);
+      if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey === "MY_GEMINI_API_KEY") {
+        return res.status(500).json({ error: "API key not configured properly. Please set a valid GEMINI_API_KEY." });
+      }
+      
+      const ai = new GoogleGenAI({ apiKey });
+      
+      let conversationContext = "You are a helpful customer service assistant for MDrip, a premium IV therapy service in Medellín. You help users with questions about services, pricing, and how it works. Keep answers concise, friendly, and professional.\n\n";
+      
+      if (history && history.length > 0) {
+        conversationContext += "Previous conversation:\n";
+        history.forEach((msg: any) => {
+          conversationContext += `${msg.role === 'user' ? 'Customer' : 'Assistant'}: ${msg.content}\n`;
+        });
+        conversationContext += "\n";
+      }
+      
+      conversationContext += `Customer: ${message}\nAssistant:`;
+      
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: conversationContext,
+      });
+      
+      res.json({ response: response.text });
+    } catch (error: any) {
+      console.error("Chat API Error:", error);
+      if (error.message && error.message.includes("API key not valid")) {
+        return res.status(401).json({ error: "Invalid API Key. Please check your GEMINI_API_KEY in the Secrets panel." });
+      }
+      res.status(500).json({ error: "Failed to generate response" });
+    }
+  });
 
   // API Route for Feedback
   app.post("/api/feedback", async (req, res) => {
