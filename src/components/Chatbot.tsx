@@ -74,7 +74,7 @@ export const Chatbot = () => {
       }));
 
       const responseStream = await ai.models.generateContentStream({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         contents: [
           ...chatHistory,
           { role: 'user', parts: [{ text: userMessage }] }
@@ -116,9 +116,26 @@ export const Chatbot = () => {
         });
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat Error:", error);
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I am having trouble connecting right now. Please try again later.' }]);
+      let errorMessage = 'Sorry, I am having trouble connecting right now. Please try again later.';
+      
+      if (error.message) {
+        if (error.message.includes("API Key not found")) {
+          errorMessage = "The Chatbot API Key is not configured. If you are on Vercel, please add GEMINI_API_KEY to your Environment Variables in the project settings.";
+        } else if (error.message.includes("403") || error.message.includes("permission")) {
+          errorMessage = "Access denied to the AI service. Please check if your API Key is valid and has the correct permissions.";
+        } else if (error.message.includes("404") || error.message.includes("not found")) {
+          errorMessage = "Model not found. Please check if the model name is correct.";
+        } else if (error.message.includes("quota") || error.message.includes("429")) {
+          errorMessage = "Quota exceeded. Please try again in a few minutes.";
+        } else {
+          // Show the actual error message to help the user debug
+          errorMessage = `Connection Error: ${error.message}`;
+        }
+      }
+      
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMessage }]);
     } finally {
       setIsLoading(false);
     }
@@ -156,7 +173,7 @@ export const Chatbot = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">MDrip Assistant</h3>
-                  <p className="text-xs text-[#00ffff]">Online</p>
+                  <p className="text-xs text-[#00ffff]">Online (v1.1)</p>
                 </div>
               </div>
               <button 
