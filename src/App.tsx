@@ -21,7 +21,11 @@ import {
   Phone,
   Star,
   Send,
-  CheckCircle2
+  CheckCircle2,
+  DollarSign,
+  CreditCard,
+  Smartphone,
+  Globe
 } from 'lucide-react';
 
 const WhatsappIcon = (props: any) => (
@@ -576,7 +580,17 @@ const ServiceCard: React.FC<{ s: any, i: number, isExpanded: boolean, onToggle: 
           </div>
         )}
       </motion.div>
-      <h3 className="text-xl font-bold mb-2 group-hover:text-[#00ffff] transition-colors">{s.title}</h3>
+      <motion.h3 
+        animate={{ 
+          scale: isExpanded ? 1.1 : 1,
+          color: isExpanded ? "#00ffff" : "#ffffff",
+          textShadow: isExpanded ? "0 0 20px rgba(0, 255, 255, 0.5)" : "none"
+        }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="text-xl font-bold mb-2 origin-left group-hover:text-[#00ffff] transition-colors"
+      >
+        {s.title}
+      </motion.h3>
       <div className="flex flex-wrap gap-2 mb-4">
         {s.tags.map((t: string) => (
           <span key={t} className="text-[10px] uppercase tracking-wider text-white/40 border border-white/10 px-2 py-0.5 rounded">
@@ -596,6 +610,17 @@ const ServiceCard: React.FC<{ s: any, i: number, isExpanded: boolean, onToggle: 
             <p className="text-white/60 text-sm mb-6 leading-relaxed border-t border-white/5 pt-4">
               {s.description}
             </p>
+            <motion.a 
+              href={`https://wa.me/573218210894?text=Hi! I'm interested in the ${s.title} drip.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full py-3 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-xl transition-all flex items-center justify-center gap-2 mb-6 shadow-lg shadow-teal-500/10"
+            >
+              <WhatsappIcon className="w-4 h-4" />
+              Book Now
+            </motion.a>
           </motion.div>
         )}
       </AnimatePresence>
@@ -720,6 +745,43 @@ const AboutUs = () => {
   );
 };
 
+const PaymentMethods = () => {
+  const methods = [
+    { name: "Cash", icon: <DollarSign className="w-6 h-6" />, desc: "USD or COP at current rate" },
+    { name: "Bancolombia", icon: <CreditCard className="w-6 h-6" />, desc: "Direct bank transfer" },
+    { name: "Nequi", icon: <Smartphone className="w-6 h-6" />, desc: "Instant mobile payment" },
+    { name: "PayPal", icon: <Globe className="w-6 h-6" />, desc: "International credit cards" }
+  ];
+
+  return (
+    <section className="py-24 bg-white/[0.02]">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Payment Methods</h2>
+          <p className="text-white/50 max-w-xl mx-auto">Flexible options for your convenience.</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {methods.map((m, i) => (
+            <motion.div 
+              key={i}
+              whileHover={{ y: -5, borderColor: "rgba(0, 255, 255, 0.3)" }}
+              className="p-8 rounded-3xl border border-white/10 bg-white/5 text-center flex flex-col items-center gap-4 transition-all"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-[#00ffff]/10 flex items-center justify-center text-[#00ffff]">
+                {m.icon}
+              </div>
+              <div>
+                <h3 className="font-bold text-lg mb-1">{m.name}</h3>
+                <p className="text-xs text-white/40 uppercase tracking-wider">{m.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const Services = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const services = [
@@ -793,8 +855,8 @@ const HowItWorks = () => {
     },
     {
       num: "2",
-      title: "Schedule a Time",
-      desc: "Pick a time that works for you."
+      title: "Schedule via WhatsApp",
+      desc: "Contact us directly via WhatsApp to pick a time that works for you. No complex forms, just direct professional communication."
     },
     {
       num: "3",
@@ -1216,6 +1278,14 @@ const FAQ = () => {
 
   const faqs = [
     {
+      question: "What payment methods do you accept?",
+      answer: "We accept Cash (USD or COP), Bancolombia bank transfers, Nequi, and PayPal. Payment is typically made at the time of service."
+    },
+    {
+      question: "How do I book a session?",
+      answer: "Currently, all bookings are handled directly via WhatsApp. This allows for a quick medical pre-evaluation and direct coordination with our physicians. Just click any 'Book Now' button to start a chat with us."
+    },
+    {
       question: "How do I know which drip is best for me?",
       answer: "Our medical professionals are here to help. You can contact us via WhatsApp for a free pre-evaluation where our doctors will assess your condition and recommend the most suitable treatment for your needs."
     },
@@ -1397,6 +1467,7 @@ export default function App() {
         <Features />
         <AboutUs />
         <Services />
+        <PaymentMethods />
         <HowItWorks />
         <Testimonials />
         <FAQ />

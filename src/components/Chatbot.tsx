@@ -2,11 +2,37 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageCircle, X, Send, Bot, Loader2 } from 'lucide-react';
 import Markdown from 'react-markdown';
+import { GoogleGenAI } from "@google/genai";
 
 type Message = {
   role: 'user' | 'assistant';
   content: string;
 };
+
+const SYSTEM_INSTRUCTION = `You are a helpful customer service assistant for MDrip, a premium IV therapy service in Medellín. 
+You help users with questions about services, pricing, and how it works. 
+Keep answers concise, friendly, and professional. 
+
+PRICING INFORMATION:
+- Immunity Boost: $130 USD
+- The Hangover Cure: $120 USD
+- Myers Cocktail: $135 USD
+- Ultra Recovery: $125 USD
+
+BOOKING INFORMATION:
+- All bookings are currently made via WhatsApp. There is no e-commerce integration on the website.
+- Users should click the "Book Now" buttons or use the WhatsApp link: https://wa.me/573218210894
+
+PAYMENT METHODS:
+- Cash (Efectivo)
+- Bancolombia Transfer
+- Nequi
+- PayPal
+
+IMPORTANT: All our base prices are in USD. 
+If a user asks for prices in COP (Colombian Pesos) or any other currency, use the Google Search tool to find the CURRENT exchange rate and perform the conversion. 
+Always specify that the conversion is an estimate based on current market rates. 
+If you use Google Search for currency, mention that you are checking the latest rates.`;
 
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,24 +61,36 @@ export const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: userMessage,
-          history: messages.slice(1) // Exclude initial greeting
-        })
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("API Key not found");
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
+      
+      const chatHistory = messages.map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      }));
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [
+          ...chatHistory,
+          { role: 'user', parts: [{ text: userMessage }] }
+        ],
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          tools: [{ googleSearch: {} }]
+        }
       });
 
-      const data = await response.json();
+      const assistantResponse = response.text || "I'm sorry, I couldn't process that request.";
+      setMessages(prev => [...prev, { role: 'assistant', content: assistantResponse }]);
       
-      if (response.ok) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
-      } else {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.error || 'Sorry, I am having trouble connecting right now. Please try again later.' }]);
-      }
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }]);
+      console.error("Chat Error:", error);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I am having trouble connecting right now. Please try again later.' }]);
     } finally {
       setIsLoading(false);
     }
