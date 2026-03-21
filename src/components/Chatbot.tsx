@@ -54,7 +54,7 @@ export const Chatbot = () => {
       }));
 
       const chat = ai.chats.create({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3-flash-preview',
         config: {
           systemInstruction: `You are a helpful customer service assistant for MDrip, a premium IV Therapy service based in Medellín, Colombia. 
           MDrip provides physician-led medical care in the comfort of the customer's accommodation (Airbnb, hotel, or home).
@@ -76,7 +76,7 @@ export const Chatbot = () => {
       const contextPrompt = `Previous conversation:\n${messages.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nUser: ${userMessage.content}`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3-flash-preview',
         contents: contextPrompt,
         config: {
           systemInstruction: `You are a helpful customer service assistant for MDrip, a premium IV Therapy service based in Medellín, Colombia. 
@@ -121,7 +121,7 @@ export const Chatbot = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-4 sm:right-6 w-[calc(100vw-32px)] sm:w-[400px] h-[60vh] sm:h-[500px] max-h-[600px] bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
+            className="fixed bottom-24 right-6 w-[350px] sm:w-[400px] h-[500px] bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
@@ -201,12 +201,10 @@ export const Chatbot = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-4 sm:right-6 w-14 h-14 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black rounded-full shadow-lg shadow-teal-500/20 flex items-center justify-center z-50 transition-colors"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black rounded-full shadow-lg shadow-teal-500/20 flex items-center justify-center z-50 transition-colors"
       >
         {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
       </motion.button>
     </>
   );
 };
-
-export default Chatbot;

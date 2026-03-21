@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
 import { 
   Droplets, 
@@ -24,7 +24,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-const Chatbot = React.lazy(() => import('./components/Chatbot'));
+import { Chatbot } from './components/Chatbot';
 
 const WhatsappIcon = (props: any) => (
   <svg
@@ -44,21 +44,9 @@ const WhatsappIcon = (props: any) => (
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Prevent scrolling when mobile menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
   return (
     <nav className="fixed top-0 left-0 w-full z-50 glass border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between relative z-50">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 group cursor-pointer">
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 5 }}
@@ -96,69 +84,41 @@ const Navbar = () => {
           </a>
         </div>
 
-        <button 
-          className="md:hidden text-white p-2 -mr-2 relative z-50" 
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          <motion.div
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
-          </motion.div>
+        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X /> : <Menu />}
         </button>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-md z-40 md:hidden"
-              onClick={() => setIsOpen(false)}
-            />
-            
-            {/* Menu Content */}
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden fixed top-20 left-0 w-full bg-[#0a0a0a]/95 backdrop-blur-2xl p-6 flex flex-col gap-2 border-b border-white/10 shadow-2xl z-40"
-            >
-              {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item, i) => (
-                <motion.a 
-                  key={item} 
-                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 + 0.1, duration: 0.3 }}
-                  className="text-xl font-medium text-white/80 hover:text-[#00ffff] transition-colors py-3 border-b border-white/5"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item}
-                </motion.a>
-              ))}
-              <motion.a 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.3 }}
-                href="https://wa.me/573218210894"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-4 mt-6 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-xl shadow-[0_0_20px_rgba(0,128,128,0.3)] text-center transition-all"
+          <motion.div 
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="md:hidden bg-white/90 backdrop-blur-2xl absolute top-20 left-0 w-full p-6 flex flex-col gap-4 border-b border-white/20 shadow-2xl"
+          >
+            {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
+              <a 
+                key={item} 
+                href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+                className="text-lg font-medium text-black/80 hover:text-[#008080] transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Book Now
-              </motion.a>
-            </motion.div>
-          </>
+                {item}
+              </a>
+            ))}
+            <a 
+              href="https://wa.me/573218210894"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 bg-[#008080] text-white font-bold rounded-xl shadow-lg shadow-teal-500/20 text-center"
+              onClick={() => setIsOpen(false)}
+            >
+              Book Now
+            </a>
+          </motion.div>
         )}
       </AnimatePresence>
     </nav>
@@ -166,7 +126,7 @@ const Navbar = () => {
 };
 
 const Hero = () => {
-  const { scrollYProgress } = useScroll({ layoutEffect: false } as any);
+  const { scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 40, damping: 15, restDelta: 0.001 });
   
   const bgY = useTransform(smoothProgress, [0, 1], ["0%", "50%"]);
@@ -264,7 +224,7 @@ const Hero = () => {
             Book Now
           </a>
           <a 
-            href="#how-it-works"
+            href="#about"
             className="w-full sm:w-auto px-10 py-4 glass hover:bg-white/10 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)] hover:border-[#00ffff]/50 hover:text-[#00ffff] text-white font-bold rounded-full transition-all duration-300 text-lg text-center"
           >
             How it Works
@@ -383,18 +343,26 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Use static values on mobile to avoid expensive calculations
-  const finalRotateX = isMobile ? 0 : rotateX;
-  const finalRotateY = isMobile ? 0 : rotateY;
-  const finalTranslateX = isMobile ? 0 : translateX;
-  const finalTranslateY = isMobile ? 0 : translateY;
-  const finalScale = isMobile ? 1 : scaleSpring;
-
-  // Always play video on mount
+  // Mobile scroll trigger
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (videoRef.current) {
+            if (entry.isIntersecting) {
+              videoRef.current.play().catch(() => {});
+            }
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
     }
+
+    return () => observer.disconnect();
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -422,6 +390,9 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     if (isMobile) return;
     setIsHovered(true);
     scale.set(1.1);
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
   };
 
   return (
@@ -438,19 +409,14 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     >
       <motion.div 
         className="relative h-80 rounded-3xl overflow-hidden mb-6"
-        style={{ 
-          rotateX: finalRotateX, 
-          rotateY: finalRotateY, 
-          transformStyle: isMobile ? "flat" : "preserve-3d",
-          willChange: "transform"
-        }}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
       >
         {s.video ? (
           <motion.video
             ref={videoRef}
             src={s.video}
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
+            style={{ x: translateX, y: translateY, scale: scaleSpring }}
             muted
             loop
             playsInline
@@ -462,10 +428,10 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
             src={s.gif ? s.gif : s.image} 
             alt={s.title} 
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
+            style={{ x: translateX, y: translateY, scale: scaleSpring }}
             referrerPolicy="no-referrer"
-            fetchPriority="high"
-            loading="eager"
+            fetchPriority={i < 4 ? "high" : "auto"}
+            loading={i < 4 ? "eager" : "lazy"}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-60 pointer-events-none" />
@@ -1322,7 +1288,7 @@ const Footer = () => {
 
 export default function App() {
   return (
-    <div className="relative min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <Navbar />
       <main>
         <Hero />
@@ -1336,9 +1302,7 @@ export default function App() {
         <CTA />
       </main>
       <Footer />
-      <Suspense fallback={null}>
-        <Chatbot />
-      </Suspense>
+      <Chatbot />
     </div>
   );
 }

@@ -14,8 +14,6 @@
 @layer base {
   body {
     @apply bg-brand-dark text-white font-sans antialiased;
-    -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-y: none;
   }
 }
 
