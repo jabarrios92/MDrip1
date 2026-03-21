@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, X, Send, Bot, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Loader2, ExternalLink } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { GoogleGenAI } from "@google/genai";
 
 type Message = {
   role: 'user' | 'assistant';
   content: string;
+  sources?: { uri: string; title: string }[];
 };
 
 const SYSTEM_INSTRUCTION = `You are a helpful customer service assistant for MDrip, a premium IV therapy service in Medellín. 
@@ -62,9 +63,7 @@ export const Chatbot = () => {
 
     try {
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("API Key not found");
-      }
+      if (!apiKey) throw new Error("API Key not found");
 
       const ai = new GoogleGenAI({ apiKey });
       
@@ -73,7 +72,7 @@ export const Chatbot = () => {
         parts: [{ text: msg.content }]
       }));
 
-      const response = await ai.models.generateContent({
+      const responseStream = await ai.models.generateContentStream({
         model: "gemini-3-flash-preview",
         contents: [
           ...chatHistory,
@@ -85,8 +84,36 @@ export const Chatbot = () => {
         }
       });
 
-      const assistantResponse = response.text || "I'm sorry, I couldn't process that request.";
-      setMessages(prev => [...prev, { role: 'assistant', content: assistantResponse }]);
+      let fullResponse = "";
+      let sources: { uri: string; title: string }[] = [];
+      
+      // Add a placeholder for the assistant response
+      setMessages(prev => [...prev, { role: 'assistant', content: "" }]);
+
+      for await (const chunk of responseStream) {
+        const text = chunk.text || "";
+        fullResponse += text;
+        
+        // Extract grounding sources if available in the chunk
+        const groundingChunks = chunk.candidates?.[0]?.groundingMetadata?.groundingChunks;
+        if (groundingChunks) {
+          groundingChunks.forEach((c: any) => {
+            if (c.web && !sources.find(s => s.uri === c.web.uri)) {
+              sources.push({ uri: c.web.uri, title: c.web.title });
+            }
+          });
+        }
+
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastMessage = newMessages[newMessages.length - 1];
+          if (lastMessage && lastMessage.role === 'assistant') {
+            lastMessage.content = fullResponse;
+            lastMessage.sources = sources.length > 0 ? sources : undefined;
+          }
+          return newMessages;
+        });
+      }
       
     } catch (error) {
       console.error("Chat Error:", error);
@@ -161,6 +188,25 @@ export const Chatbot = () => {
                     {msg.role === 'assistant' ? (
                       <div className="markdown-body text-sm prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/50">
                         <Markdown>{msg.content}</Markdown>
+                        {msg.sources && msg.sources.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-white/10">
+                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Sources:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {msg.sources.map((source, idx) => (
+                                <a 
+                                  key={idx}
+                                  href={source.uri}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-[10px] bg-white/5 hover:bg-white/10 px-2 py-1 rounded transition-colors text-cyan-400"
+                                >
+                                  <ExternalLink className="w-2 h-2" />
+                                  {source.title || 'Source'}
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       msg.content
