@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
 import { 
   Droplets, 
@@ -24,8 +24,6 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-const Chatbot = React.lazy(() => import('./components/Chatbot'));
-
 const WhatsappIcon = (props: any) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -44,21 +42,9 @@ const WhatsappIcon = (props: any) => (
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Prevent scrolling when mobile menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
   return (
     <nav className="fixed top-0 left-0 w-full z-50 glass border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between relative z-50">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 group cursor-pointer">
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 5 }}
@@ -96,69 +82,41 @@ const Navbar = () => {
           </a>
         </div>
 
-        <button 
-          className="md:hidden text-white p-2 -mr-2 relative z-50" 
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          <motion.div
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
-          </motion.div>
+        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X /> : <Menu />}
         </button>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-md z-40 md:hidden"
-              onClick={() => setIsOpen(false)}
-            />
-            
-            {/* Menu Content */}
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden fixed top-20 left-0 w-full bg-[#0a0a0a]/95 backdrop-blur-2xl p-6 flex flex-col gap-2 border-b border-white/10 shadow-2xl z-40"
-            >
-              {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item, i) => (
-                <motion.a 
-                  key={item} 
-                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 + 0.1, duration: 0.3 }}
-                  className="text-xl font-medium text-white/80 hover:text-[#00ffff] transition-colors py-3 border-b border-white/5"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item}
-                </motion.a>
-              ))}
-              <motion.a 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.3 }}
-                href="https://wa.me/573218210894"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-4 mt-6 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-xl shadow-[0_0_20px_rgba(0,128,128,0.3)] text-center transition-all"
+          <motion.div 
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="md:hidden bg-white/90 backdrop-blur-2xl absolute top-20 left-0 w-full p-6 flex flex-col gap-4 border-b border-white/20 shadow-2xl will-change-[transform,opacity]"
+          >
+            {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
+              <a 
+                key={item} 
+                href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+                className="text-lg font-medium text-black/80 hover:text-[#008080] transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Book Now
-              </motion.a>
-            </motion.div>
-          </>
+                {item}
+              </a>
+            ))}
+            <a 
+              href="https://wa.me/573218210894"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 bg-[#008080] text-white font-bold rounded-xl shadow-lg shadow-teal-500/20 text-center"
+              onClick={() => setIsOpen(false)}
+            >
+              Book Now
+            </a>
+          </motion.div>
         )}
       </AnimatePresence>
     </nav>
@@ -166,8 +124,8 @@ const Navbar = () => {
 };
 
 const Hero = () => {
-  const { scrollYProgress } = useScroll({ layoutEffect: false } as any);
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 40, damping: 15, restDelta: 0.001 });
+  const { scrollYProgress } = useScroll();
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
   
   const bgY = useTransform(smoothProgress, [0, 1], ["0%", "50%"]);
   const textY = useTransform(smoothProgress, [0, 1], ["0%", "100%"]);
@@ -181,14 +139,14 @@ const Hero = () => {
       {/* Parallax Background */}
       <motion.div 
         style={{ y: bgY }}
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 will-change-transform transform-gpu"
       >
         <motion.div 
           animate={{ 
-            scale: [1, 1.02, 1],
-            opacity: [0.2, 0.25, 0.2]
+            scale: [1, 1.05, 1],
+            opacity: [0.2, 0.3, 0.2]
           }}
-          transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
+          transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
           className="absolute inset-0 bg-[url('/hero-bg.webp')] bg-cover bg-center"
           aria-hidden="true"
         />
@@ -197,14 +155,14 @@ const Hero = () => {
 
       <motion.div 
         style={{ y: textY, opacity }}
-        className="relative z-10 max-w-5xl mx-auto px-6 text-center -mt-20 md:-mt-32"
+        className="relative z-10 max-w-5xl mx-auto px-6 text-center -mt-20 md:-mt-32 will-change-[transform,opacity] transform-gpu"
       >
         <motion.div
           style={{ scale: logoScale, rotate: logoRotate, y: logoY }}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-10 mt-[10vh] inline-block"
+          className="mb-10 mt-[10vh] inline-block will-change-[transform,opacity] transform-gpu"
         >
           <div className="relative">
             <motion.div 
@@ -213,7 +171,7 @@ const Hero = () => {
                 opacity: [0.1, 0.2, 0.1]
               }}
               transition={{ repeat: Infinity, duration: 4 }}
-              className="absolute -inset-20 bg-cyan-500/20 blur-[100px] rounded-full" 
+              className="absolute -inset-20 bg-cyan-500/20 blur-[100px] rounded-full will-change-[transform,opacity] transform-gpu" 
             />
             <img 
               src="/Logohero.webp" 
@@ -234,7 +192,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-tight"
+          className="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-tight will-change-transform"
         >
           Premium IV Therapy <br />
           <span className="text-gradient italic font-serif">At Your Doorstep</span>
@@ -244,7 +202,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-xl md:text-2xl text-white/60 mb-10 max-w-2xl mx-auto font-light"
+          className="text-xl md:text-2xl text-white/60 mb-10 max-w-2xl mx-auto font-light will-change-transform"
         >
           Experience professional medical hydration and wellness treatments in the comfort of your home.
         </motion.p>
@@ -253,7 +211,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 will-change-transform"
         >
           <a 
             href="https://wa.me/573218210894"
@@ -264,7 +222,7 @@ const Hero = () => {
             Book Now
           </a>
           <a 
-            href="#how-it-works"
+            href="#about"
             className="w-full sm:w-auto px-10 py-4 glass hover:bg-white/10 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)] hover:border-[#00ffff]/50 hover:text-[#00ffff] text-white font-bold rounded-full transition-all duration-300 text-lg text-center"
           >
             How it Works
@@ -339,7 +297,7 @@ const Features = () => {
               }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.2, duration: 0.8 }}
-              className="p-8 rounded-3xl glass hover:border-[#00ffff]/30 transition-all group"
+              className="p-8 rounded-3xl glass hover:border-[#00ffff]/30 transition-all group will-change-transform transform-gpu"
             >
               <div className="w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] group-hover:scale-110 transition-transform">
                 {f.icon}
@@ -383,31 +341,31 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Use static values on mobile to avoid expensive calculations
-  const finalRotateX = isMobile ? 0 : rotateX;
-  const finalRotateY = isMobile ? 0 : rotateY;
-  const finalTranslateX = isMobile ? 0 : translateX;
-  const finalTranslateY = isMobile ? 0 : translateY;
-  const finalScale = isMobile ? 1 : scaleSpring;
-
-  // Always play video on mount
+  // Mobile scroll trigger
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = true;
-    video.setAttribute('muted', '');
-    video.setAttribute('playsinline', '');
-    video.setAttribute('webkit-playsinline', '');
-    const playVideo = () => {
-      video.play().catch(() => {});
-    };
-    if (video.readyState >= 2) {
-      playVideo();
-    } else {
-      video.addEventListener('canplay', playVideo, { once: true });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!isMobile) return;
+
+        entries.forEach((entry) => {
+          if (videoRef.current) {
+            if (entry.isIntersecting) {
+              videoRef.current.play().catch(() => {});
+            } else {
+              videoRef.current.pause();
+            }
+          }
+        });
+      },
+      { threshold: 0.3 } // More aggressive trigger for mobile
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
     }
-    return () => video.removeEventListener('canplay', playVideo);
-  }, []);
+
+    return () => observer.disconnect();
+  }, [isMobile]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isMobile) return;
@@ -428,17 +386,24 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     x.set(0);
     y.set(0);
     scale.set(1);
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
   };
 
   const handleMouseEnter = () => {
     if (isMobile) return;
     setIsHovered(true);
     scale.set(1.1);
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
   };
 
   return (
     <motion.div 
       ref={cardRef}
+      layout
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true, margin: "-100px" }}
@@ -450,36 +415,29 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     >
       <motion.div 
         className="relative h-80 rounded-3xl overflow-hidden mb-6"
-        style={{ 
-          rotateX: finalRotateX, 
-          rotateY: finalRotateY, 
-          transformStyle: isMobile ? "flat" : "preserve-3d",
-          willChange: "transform"
-        }}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
       >
         {s.video ? (
           <motion.video
             ref={videoRef}
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
+            src={s.video}
+            className="absolute inset-0 w-full h-full object-cover will-change-transform transform-gpu"
+            style={{ x: translateX, y: translateY, scale: scaleSpring }}
             muted
             loop
             playsInline
-            autoPlay
-            preload="metadata"
-          >
-            <source src={s.video.replace('.webm', '.mp4')} type="video/mp4" />
-            <source src={s.video} type="video/webm" />
-          </motion.video>
+            autoPlay={isMobile}
+            preload="auto"
+          />
         ) : (
           <motion.img 
-            src={s.gif ? s.gif : s.image} 
+            src={(isHovered || isMobile) && s.gif ? s.gif : s.image} 
             alt={s.title} 
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
+            className="absolute inset-0 w-full h-full object-cover will-change-transform transform-gpu"
+            style={{ x: translateX, y: translateY, scale: scaleSpring }}
             referrerPolicy="no-referrer"
-            fetchPriority="high"
-            loading="eager"
+            fetchPriority={i < 4 ? "high" : "auto"}
+            loading={i < 4 ? "eager" : "lazy"}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-60 pointer-events-none" />
@@ -489,13 +447,13 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
         {s.title === "Beauty & Glow" && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ transform: "translateZ(30px) translate(-50%, -50%)" }}>
             {/* Soft Emerald Aura */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#10b981]/15 blur-[80px] rounded-full transition-opacity duration-1000 opacity-100" />
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#10b981]/15 blur-[80px] rounded-full transition-opacity duration-1000 will-change-opacity ${isHovered || isMobile ? 'opacity-100' : 'opacity-0'}`} />
             
             {/* Floating Sparkles */}
             {[...Array(6)].map((_, i) => (
               <div 
                 key={`sparkle-${i}`}
-                className="absolute w-1 h-1 bg-white rounded-full animate-[drift-upwards_3s_ease-in-out_infinite]"
+                className={`absolute w-1 h-1 bg-white rounded-full will-change-[transform,opacity] transform-gpu ${isHovered || isMobile ? 'animate-[drift-upwards_3s_ease-in-out_infinite]' : 'opacity-0'}`}
                 style={{
                   left: `${Math.random() * 100 - 50}px`,
                   top: `${Math.random() * 100 - 50}px`,
@@ -511,13 +469,13 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
         {s.title === "Athletic Recovery" && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ transform: "translateZ(30px) translate(-50%, -50%)" }}>
             {/* Soft Purple Aura */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#8b5cf6]/20 blur-[80px] rounded-full transition-opacity duration-1000 opacity-100" />
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#8b5cf6]/20 blur-[80px] rounded-full transition-opacity duration-1000 will-change-opacity ${isHovered || isMobile ? 'opacity-100' : 'opacity-0'}`} />
             
             {/* Floating Sparkles */}
             {[...Array(6)].map((_, i) => (
               <div 
                 key={`sparkle-purple-${i}`}
-                className="absolute w-1 h-1 bg-white rounded-full animate-[drift-upwards_3s_ease-in-out_infinite]"
+                className={`absolute w-1 h-1 bg-white rounded-full will-change-[transform,opacity] transform-gpu ${isHovered || isMobile ? 'animate-[drift-upwards_3s_ease-in-out_infinite]' : 'opacity-0'}`}
                 style={{
                   left: `${Math.random() * 100 - 50}px`,
                   top: `${Math.random() * 100 - 50}px`,
@@ -551,7 +509,7 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
                 }}
               >
                 <div 
-                  className="transition-all duration-1000 pointer-events-auto opacity-100 translate-y-0"
+                  className={`transition-all duration-1000 pointer-events-auto will-change-[transform,opacity] transform-gpu ${isHovered || isMobile ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                   style={{ transitionDelay: `${idx * 200}ms`, transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}
                 >
                   <div 
@@ -559,7 +517,7 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
                     style={{ animationDelay: `${idx * 0.7}s` }}
                   >
                     <span className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] tracking-wider">{ing}</span>
-                    <div className="absolute inset-0 rounded-full border border-white/20 animate-[ping_3s_ease-in-out_infinite]" style={{ animationDelay: `${idx * 0.5}s` }} />
+                    <div className={`absolute inset-0 rounded-full border border-white/20 ${isHovered || isMobile ? 'animate-[ping_3s_ease-in-out_infinite]' : 'opacity-0'}`} style={{ animationDelay: `${idx * 0.5}s` }} />
                   </div>
                 </div>
               </div>
@@ -567,10 +525,10 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
           }
 
           const transforms = [
-            "-translate-x-28 -translate-y-28 -rotate-6",
-            "translate-x-24 -translate-y-20 rotate-12",
-            "-translate-x-24 translate-y-28 -rotate-12",
-            "translate-x-28 translate-y-24 rotate-6",
+            "group-hover:-translate-x-28 group-hover:-translate-y-28 group-hover:-rotate-6",
+            "group-hover:translate-x-24 group-hover:-translate-y-20 group-hover:rotate-12",
+            "group-hover:-translate-x-24 group-hover:translate-y-28 group-hover:-rotate-12",
+            "group-hover:translate-x-28 group-hover:translate-y-24 group-hover:rotate-6",
           ];
           const delays = [
             "delay-0",
@@ -585,7 +543,7 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
               style={{ transform: "translateZ(40px) translate(-50%, -50%)" }}
             >
               <div 
-                className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${delays[idx % delays.length]} opacity-100 scale-100 ${transforms[idx % transforms.length]}`}
+                className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${delays[idx % delays.length]} ${isHovered || isMobile ? 'opacity-100 scale-100 ' + transforms[idx % transforms.length] : 'opacity-0 scale-0'}`}
               >
                 <div 
                   className="relative water-droplet rounded-full text-white text-[11px] font-bold px-4 py-2 animate-float whitespace-nowrap overflow-hidden"
@@ -707,7 +665,7 @@ const AboutUs = () => {
             className="relative"
           >
             <div className="aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/10 relative group">
-              <motion.div style={{ y: imgY, height: "130%", top: "-15%", position: "absolute", width: "100%" }}>
+              <motion.div style={{ y: imgY, height: "130%", top: "-15%", position: "absolute", width: "100%" }} className="will-change-transform transform-gpu">
                 <img 
                   src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=1000" 
                   alt="Medical Professional in Medellín" 
@@ -849,9 +807,9 @@ const HowItWorks = () => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              className="relative z-10 rounded-3xl overflow-hidden shadow-2xl shadow-cyan-500/10 aspect-[4/5]"
+              className="relative z-10 rounded-3xl overflow-hidden shadow-2xl shadow-cyan-500/10 aspect-[4/5] will-change-transform transform-gpu"
             >
-              <motion.div style={{ y: imgY, height: "130%", top: "-15%", position: "absolute", width: "100%" }}>
+              <motion.div style={{ y: imgY, height: "130%", top: "-15%", position: "absolute", width: "100%" }} className="will-change-transform transform-gpu">
                 <img 
                   src="/Outroweb.webp" 
                   alt="Home Care" 
@@ -1334,9 +1292,11 @@ const Footer = () => {
 };
 
 
+import { AIChatbot } from './components/AIChatbot';
+
 export default function App() {
   return (
-    <div className="relative min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <Navbar />
       <main>
         <Hero />
@@ -1350,9 +1310,7 @@ export default function App() {
         <CTA />
       </main>
       <Footer />
-      <Suspense fallback={null}>
-        <Chatbot />
-      </Suspense>
+      <AIChatbot />
     </div>
   );
 }

@@ -14,14 +14,12 @@
 @layer base {
   body {
     @apply bg-brand-dark text-white font-sans antialiased;
-    -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-y: none;
   }
 }
 
 .glass {
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -44,6 +42,7 @@
 }
 .animate-float {
   animation: float 4s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes splash-ring {
@@ -78,12 +77,13 @@
 .liquid-blob {
   animation: liquid-wobble 3s ease-in-out infinite;
   transform: translateZ(0);
+  will-change: border-radius;
 }
 
 .water-droplet {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 
     inset 2px 2px 6px rgba(255, 255, 255, 0.6),
@@ -102,15 +102,4 @@
   border-radius: 50%;
   transform: rotate(-45deg);
   pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
 }
