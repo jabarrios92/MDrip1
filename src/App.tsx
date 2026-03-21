@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'motion/react';
 import { 
   Droplets, 
   Home, 
@@ -18,54 +18,29 @@ import {
   Menu, 
   X,
   Instagram,
+  Facebook,
+  Twitter,
   Phone,
   Star,
   Send,
   CheckCircle2
 } from 'lucide-react';
 
-const Chatbot = React.lazy(() => import('./components/Chatbot'));
-
-const WhatsappIcon = (props: any) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    {...props}
-  >
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-  </svg>
-);
-
 // --- Components ---
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Prevent scrolling when mobile menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
   return (
     <nav className="fixed top-0 left-0 w-full z-50 glass border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between relative z-50">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 group cursor-pointer">
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 5 }}
             className="relative h-14 w-14 flex items-center justify-center"
           >
             <img 
-              src="/logo.webp" 
+              src="/logo.png" 
               alt="MDRIP Logo" 
               className="h-full w-full object-contain mix-blend-screen brightness-125 contrast-125 drop-shadow-[0_0_10px_rgba(0,255,255,0.5)]"
               onError={(e) => {
@@ -77,7 +52,7 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-8">
-          {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
+          {['Services', 'How it Works', 'About', 'Contact'].map((item) => (
             <a 
               key={item} 
               href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
@@ -96,85 +71,48 @@ const Navbar = () => {
           </a>
         </div>
 
-        <button 
-          className="md:hidden text-white p-2 -mr-2 relative z-50" 
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          <motion.div
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
-          </motion.div>
+        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X /> : <Menu />}
         </button>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-md z-40 md:hidden"
+      {/* Mobile Menu */}
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="md:hidden bg-white/90 backdrop-blur-2xl absolute top-20 left-0 w-full p-6 flex flex-col gap-4 border-b border-white/20 shadow-2xl"
+        >
+          {['Services', 'How it Works', 'About', 'Contact'].map((item) => (
+            <a 
+              key={item} 
+              href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+              className="text-lg font-medium text-black/80 hover:text-[#008080] transition-colors"
               onClick={() => setIsOpen(false)}
-            />
-            
-            {/* Menu Content */}
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden fixed top-20 left-0 w-full bg-[#0a0a0a]/95 backdrop-blur-2xl p-6 flex flex-col gap-2 border-b border-white/10 shadow-2xl z-40"
             >
-              {['Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item, i) => (
-                <motion.a 
-                  key={item} 
-                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 + 0.1, duration: 0.3 }}
-                  className="text-xl font-medium text-white/80 hover:text-[#00ffff] transition-colors py-3 border-b border-white/5"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item}
-                </motion.a>
-              ))}
-              <motion.a 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.3 }}
-                href="https://wa.me/573218210894"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-4 mt-6 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-xl shadow-[0_0_20px_rgba(0,128,128,0.3)] text-center transition-all"
-                onClick={() => setIsOpen(false)}
-              >
-                Book Now
-              </motion.a>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              {item}
+            </a>
+          ))}
+          <a 
+            href="https://wa.me/573218210894"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-3 bg-[#008080] text-white font-bold rounded-xl shadow-lg shadow-teal-500/20 text-center"
+            onClick={() => setIsOpen(false)}
+          >
+            Book Now
+          </a>
+        </motion.div>
+      )}
     </nav>
   );
 };
 
 const Hero = () => {
-  const { scrollYProgress } = useScroll({ layoutEffect: false } as any);
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 40, damping: 15, restDelta: 0.001 });
-  
-  const bgY = useTransform(smoothProgress, [0, 1], ["0%", "50%"]);
-  const textY = useTransform(smoothProgress, [0, 1], ["0%", "100%"]);
-  const opacity = useTransform(smoothProgress, [0, 0.5], [1, 0]);
-  const logoScale = useTransform(smoothProgress, [0, 0.3], [1, 0.6]);
-  const logoRotate = useTransform(smoothProgress, [0, 0.3], [0, -15]);
-  const logoY = useTransform(smoothProgress, [0, 0.3], [0, 50]);
+  const { scrollYProgress } = useScroll();
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
     <section className="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden">
@@ -183,13 +121,8 @@ const Hero = () => {
         style={{ y: bgY }}
         className="absolute inset-0 z-0"
       >
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.02, 1],
-            opacity: [0.2, 0.25, 0.2]
-          }}
-          transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
-          className="absolute inset-0 bg-[url('/hero-bg.webp')] bg-cover bg-center"
+        <div 
+          className="absolute inset-0 bg-[url('/hero-bg.jpg')] bg-cover bg-center opacity-30"
           aria-hidden="true"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a]/50 to-[#0a0a0a]" />
@@ -200,10 +133,9 @@ const Hero = () => {
         className="relative z-10 max-w-5xl mx-auto px-6 text-center -mt-20 md:-mt-32"
       >
         <motion.div
-          style={{ scale: logoScale, rotate: logoRotate, y: logoY }}
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
           className="mb-10 mt-[10vh] inline-block"
         >
           <div className="relative">
@@ -216,12 +148,9 @@ const Hero = () => {
               className="absolute -inset-20 bg-cyan-500/20 blur-[100px] rounded-full" 
             />
             <img 
-              src="/Logohero.webp" 
+              src="/Logohero.png" 
               alt="MDrip Logo" 
               className="w-[260px] md:w-[345px] mx-auto relative drop-shadow-[0_0_50px_rgba(0,255,255,0.6)]"
-              fetchPriority="high"
-              loading="eager"
-              decoding="sync"
               onError={(e) => {
                 // Fallback if Logohero.png isn't available
                 e.currentTarget.src = 'https://picsum.photos/seed/medical/400/400';
@@ -233,7 +162,7 @@ const Hero = () => {
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ delay: 0.5, duration: 0.8 }}
           className="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-tight"
         >
           Premium IV Therapy <br />
@@ -243,7 +172,7 @@ const Hero = () => {
         <motion.p 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ delay: 0.7, duration: 0.8 }}
           className="text-xl md:text-2xl text-white/60 mb-10 max-w-2xl mx-auto font-light"
         >
           Experience professional medical hydration and wellness treatments in the comfort of your home.
@@ -252,7 +181,7 @@ const Hero = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ delay: 0.9, duration: 0.8 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <a 
@@ -263,16 +192,22 @@ const Hero = () => {
           >
             Book Now
           </a>
-          <a 
-            href="#how-it-works"
-            className="w-full sm:w-auto px-10 py-4 glass hover:bg-white/10 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)] hover:border-[#00ffff]/50 hover:text-[#00ffff] text-white font-bold rounded-full transition-all duration-300 text-lg text-center"
-          >
+          <button className="w-full sm:w-auto px-10 py-4 glass hover:bg-white/10 text-white font-bold rounded-full transition-all duration-300 text-lg">
             How it Works
-          </a>
+          </button>
         </motion.div>
       </motion.div>
 
-
+      {/* Scroll Indicator */}
+      <motion.div 
+        animate={{ y: [0, 10, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/30"
+      >
+        <div className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center p-1">
+          <div className="w-1 h-2 bg-[#00ffff] rounded-full" />
+        </div>
+      </motion.div>
     </section>
   );
 };
@@ -306,14 +241,6 @@ const Features = () => {
     }
   ];
 
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   return (
     <section ref={ref} className="py-24 bg-[#0a0a0a] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
@@ -321,24 +248,11 @@ const Features = () => {
           {features.map((f, i) => (
             <motion.div 
               key={i}
-              style={{ y: isMobile ? 0 : yTransforms[i] }}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ 
-                opacity: 1, 
-                y: 0,
-                ...(isMobile ? {
-                  transition: {
-                    y: {
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      duration: 3 + i,
-                      ease: "easeInOut"
-                    }
-                  }
-                } : {})
-              }}
+              style={{ y: yTransforms[i] }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.2, duration: 0.8 }}
+              transition={{ delay: i * 0.2 }}
               className="p-8 rounded-3xl glass hover:border-[#00ffff]/30 transition-all group"
             >
               <div className="w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] group-hover:scale-110 transition-transform">
@@ -357,48 +271,22 @@ const Features = () => {
 const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [gifKey, setGifKey] = useState(0);
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  const cardRef = React.useRef<HTMLDivElement>(null);
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const scale = useMotionValue(1);
 
   const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
   const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
-  const scaleSpring = useSpring(scale, { stiffness: 300, damping: 30 });
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["8deg", "-8deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-8deg", "8deg"]);
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
   
-  const translateX = useTransform(mouseXSpring, [-0.5, 0.5], ["-10px", "10px"]);
-  const translateY = useTransform(mouseYSpring, [-0.5, 0.5], ["-10px", "10px"]);
-
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Use static values on mobile to avoid expensive calculations
-  const finalRotateX = isMobile ? 0 : rotateX;
-  const finalRotateY = isMobile ? 0 : rotateY;
-  const finalTranslateX = isMobile ? 0 : translateX;
-  const finalTranslateY = isMobile ? 0 : translateY;
-  const finalScale = isMobile ? 1 : scaleSpring;
-
-  // Always play video on mount
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
-  }, []);
+  const translateX = useTransform(mouseXSpring, [-0.5, 0.5], ["-15px", "15px"]);
+  const translateY = useTransform(mouseYSpring, [-0.5, 0.5], ["-15px", "15px"]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isMobile) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
@@ -411,25 +299,30 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
   };
 
   const handleMouseLeave = () => {
-    if (isMobile) return;
     setIsHovered(false);
     x.set(0);
     y.set(0);
-    scale.set(1);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
   };
 
   const handleMouseEnter = () => {
-    if (isMobile) return;
     setIsHovered(true);
-    scale.set(1.1);
+    if (s.gif) {
+      setGifKey(Date.now());
+    }
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
   };
 
   return (
     <motion.div 
-      ref={cardRef}
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ once: true }}
       className="group cursor-pointer"
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
@@ -438,50 +331,53 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
     >
       <motion.div 
         className="relative h-80 rounded-3xl overflow-hidden mb-6"
-        style={{ 
-          rotateX: finalRotateX, 
-          rotateY: finalRotateY, 
-          transformStyle: isMobile ? "flat" : "preserve-3d",
-          willChange: "transform"
-        }}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
       >
         {s.video ? (
           <motion.video
             ref={videoRef}
             src={s.video}
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            style={{ x: translateX, y: translateY, scale: 1.15 }}
             muted
             loop
             playsInline
-            autoPlay={true}
             preload="auto"
           />
         ) : (
           <motion.img 
-            src={s.gif ? s.gif : s.image} 
+            src={isHovered && s.gif ? `${s.gif}?t=${gifKey}` : s.image} 
             alt={s.title} 
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ x: finalTranslateX, y: finalTranslateY, scale: finalScale }}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            style={{ x: translateX, y: translateY, scale: 1.15 }}
             referrerPolicy="no-referrer"
-            fetchPriority="high"
-            loading="eager"
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-60 pointer-events-none" />
         
         {/* Elegant Aura Effect for Blue Bag */}
+        {s.title === "The Hangover Cure" && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ transform: "translateZ(30px) translate(-50%, -50%)" }}>
+            {/* Smooth Glowing Aura */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#00ffff]/20 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            
+            {/* Elegant Ripples */}
+            <div className="absolute top-1/2 left-1/2 w-32 h-32 border border-[#00ffff]/30 rounded-full opacity-0 group-hover:animate-[ping_4s_cubic-bezier(0.1,0.8,0.3,1)_infinite]" style={{ transform: "translate(-50%, -50%)" }} />
+            <div className="absolute top-1/2 left-1/2 w-32 h-32 border border-[#008080]/30 rounded-full opacity-0 group-hover:animate-[ping_4s_cubic-bezier(0.1,0.8,0.3,1)_infinite_1.5s]" style={{ transform: "translate(-50%, -50%)" }} />
+          </div>
+        )}
+
         {/* Radiant Glow Effect for Beauty & Glow */}
         {s.title === "Beauty & Glow" && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ transform: "translateZ(30px) translate(-50%, -50%)" }}>
             {/* Soft Emerald Aura */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#10b981]/15 blur-[80px] rounded-full transition-opacity duration-1000 opacity-100" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#10b981]/15 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
             
             {/* Floating Sparkles */}
             {[...Array(6)].map((_, i) => (
               <div 
                 key={`sparkle-${i}`}
-                className="absolute w-1 h-1 bg-white rounded-full animate-[drift-upwards_3s_ease-in-out_infinite]"
+                className="absolute w-1 h-1 bg-white rounded-full opacity-0 group-hover:animate-[drift-upwards_3s_ease-in-out_infinite]"
                 style={{
                   left: `${Math.random() * 100 - 50}px`,
                   top: `${Math.random() * 100 - 50}px`,
@@ -493,17 +389,39 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
           </div>
         )}
 
+        {/* Radiant Glow Effect for Immunity Boost */}
+        {s.title === "Immunity Boost" && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ transform: "translateZ(30px) translate(-50%, -50%)" }}>
+            {/* Soft Orange Aura */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#ff8c00]/15 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            
+            {/* Floating Sparkles */}
+            {[...Array(6)].map((_, i) => (
+              <div 
+                key={`sparkle-orange-${i}`}
+                className="absolute w-1 h-1 bg-white rounded-full opacity-0 group-hover:animate-[drift-upwards_3s_ease-in-out_infinite]"
+                style={{
+                  left: `${Math.random() * 100 - 50}px`,
+                  top: `${Math.random() * 100 - 50}px`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  boxShadow: '0 0 8px 2px rgba(255, 140, 0, 0.6)'
+                }}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Radiant Glow Effect for Athletic Recovery */}
         {s.title === "Athletic Recovery" && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ transform: "translateZ(30px) translate(-50%, -50%)" }}>
             {/* Soft Purple Aura */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#8b5cf6]/20 blur-[80px] rounded-full transition-opacity duration-1000 opacity-100" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#8b5cf6]/20 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
             
             {/* Floating Sparkles */}
             {[...Array(6)].map((_, i) => (
               <div 
                 key={`sparkle-purple-${i}`}
-                className="absolute w-1 h-1 bg-white rounded-full animate-[drift-upwards_3s_ease-in-out_infinite]"
+                className="absolute w-1 h-1 bg-white rounded-full opacity-0 group-hover:animate-[drift-upwards_3s_ease-in-out_infinite]"
                 style={{
                   left: `${Math.random() * 100 - 50}px`,
                   top: `${Math.random() * 100 - 50}px`,
@@ -517,6 +435,7 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
 
         {/* Floating Ingredients */}
         {s.ingredients && s.ingredients.map((ing: string, idx: number) => {
+          const isBlueBag = s.title === "The Hangover Cure";
           const isBeautyGlow = s.title === "Beauty & Glow";
 
           if (isBeautyGlow) {
@@ -537,7 +456,7 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
                 }}
               >
                 <div 
-                  className="transition-all duration-1000 pointer-events-auto opacity-100 translate-y-0"
+                  className="opacity-0 group-hover:opacity-100 transition-all duration-1000 pointer-events-auto translate-y-8 group-hover:translate-y-0"
                   style={{ transitionDelay: `${idx * 200}ms`, transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}
                 >
                   <div 
@@ -545,7 +464,54 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
                     style={{ animationDelay: `${idx * 0.7}s` }}
                   >
                     <span className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] tracking-wider">{ing}</span>
-                    <div className="absolute inset-0 rounded-full border border-white/20 animate-[ping_3s_ease-in-out_infinite]" style={{ animationDelay: `${idx * 0.5}s` }} />
+                    <div className="absolute inset-0 rounded-full border border-white/20 opacity-0 group-hover:animate-[ping_3s_ease-in-out_infinite]" style={{ animationDelay: `${idx * 0.5}s` }} />
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (isBlueBag) {
+            const sidePositions = [
+              { right: '5%', top: '20%' },
+              { left: '5%', top: '40%' },
+              { right: '10%', top: '65%' },
+              { left: '10%', bottom: '15%' },
+            ];
+            const pos = sidePositions[idx % sidePositions.length];
+
+            return (
+              <div 
+                key={ing}
+                className="absolute z-20 pointer-events-none"
+                style={{ 
+                  ...pos,
+                  transform: `translateZ(${40 + idx * 15}px)`
+                }}
+              >
+                <div 
+                  className="opacity-0 group-hover:opacity-100 transition-all duration-1000 pointer-events-auto translate-y-12 group-hover:translate-y-0"
+                  style={{ transitionDelay: `${idx * 150}ms`, transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                >
+                  {/* Subtle Splash Ring */}
+                  <div 
+                    className="absolute top-1/2 left-1/2 w-16 h-16 border border-[#00ffff]/60 rounded-full opacity-0 group-hover:animate-[splash-ring_1.2s_cubic-bezier(0.1,0.8,0.3,1)_forwards]"
+                    style={{ animationDelay: `${idx * 0.15 + 0.4}s` }}
+                  />
+                  
+                  {/* Tiny rising bubbles */}
+                  <div className="absolute -top-6 left-1/4 w-2 h-2 rounded-full bg-white/40 opacity-0 group-hover:animate-[drift-upwards_2s_ease-in-out_infinite]" style={{ animationDelay: `${idx * 0.3 + 0.5}s` }} />
+                  <div className="absolute -bottom-4 right-1/4 w-1.5 h-1.5 rounded-full bg-[#00ffff]/40 opacity-0 group-hover:animate-[drift-upwards_2.5s_ease-in-out_infinite]" style={{ animationDelay: `${idx * 0.3 + 0.2}s` }} />
+
+                  <div 
+                    className="animate-float"
+                    style={{ animationDelay: `${idx * 0.4}s` }}
+                  >
+                    <div 
+                      className="liquid-blob water-droplet relative text-white text-[11px] font-bold px-5 py-3 whitespace-nowrap hover:scale-110 transition-transform duration-300 cursor-pointer flex items-center justify-center"
+                    >
+                      <span className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wider">{ing}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -553,10 +519,10 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
           }
 
           const transforms = [
-            "-translate-x-28 -translate-y-28 -rotate-6",
-            "translate-x-24 -translate-y-20 rotate-12",
-            "-translate-x-24 translate-y-28 -rotate-12",
-            "translate-x-28 translate-y-24 rotate-6",
+            "group-hover:-translate-x-28 group-hover:-translate-y-28 group-hover:-rotate-6",
+            "group-hover:translate-x-24 group-hover:-translate-y-20 group-hover:rotate-12",
+            "group-hover:-translate-x-24 group-hover:translate-y-28 group-hover:-rotate-12",
+            "group-hover:translate-x-28 group-hover:translate-y-24 group-hover:rotate-6",
           ];
           const delays = [
             "delay-0",
@@ -571,7 +537,7 @@ const ServiceCard: React.FC<{ s: any, i: number }> = ({ s, i }) => {
               style={{ transform: "translateZ(40px) translate(-50%, -50%)" }}
             >
               <div 
-                className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${delays[idx % delays.length]} opacity-100 scale-100 ${transforms[idx % transforms.length]}`}
+                className={`opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 ${transforms[idx % transforms.length]} transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${delays[idx % delays.length]}`}
               >
                 <div 
                   className="relative water-droplet rounded-full text-white text-[11px] font-bold px-4 py-2 animate-float whitespace-nowrap overflow-hidden"
@@ -645,7 +611,7 @@ const AboutUs = () => {
   const imgY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
   return (
-    <section id="about-us" ref={ref} className="py-24 relative overflow-hidden bg-white/[0.02]">
+    <section id="about" ref={ref} className="py-24 relative overflow-hidden bg-white/[0.02]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div
@@ -698,7 +664,6 @@ const AboutUs = () => {
                   src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=1000" 
                   alt="Medical Professional in Medellín" 
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
-                  loading="lazy"
                 />
               </motion.div>
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-80" />
@@ -731,28 +696,32 @@ const Services = () => {
     {
       title: "Immunity Boost",
       price: "$130",
-      video: "/Animacionamarilla.webm",
+      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=800",
+      video: "/animarilla.mp4",
       tags: ["Vitamin C", "Electrolytes", "Antioxidants"],
       description: "Strengthen your body’s natural defenses with a treatment centered around high-dose Vitamin C, a potent antioxidant known for its role in immune health, cellular protection, and inflammation reduction. Perfect for staying healthy during travel or when feeling run down."
     },
     {
       title: "The Hangover Cure",
       price: "$120",
-      video: "/Animacionazul.webm",
+      image: "/prueba1.png",
       tags: ["RINGER LACTATE", "B-Complex", "THIAMINE"],
+      ingredients: ["Vitamina B12", "Vitamina C", "Zinc", "Magnesio"],
       description: "Recover quickly from a night out with our specialized hangover treatment, designed to rehydrate, replenish nutrients, and soothe nausea."
     },
     {
       title: "Myers Cocktail",
       price: "$135",
-      video: "/Animacionverde.webm",
+      image: "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&q=80&w=800",
+      video: "/Animacionverde.mp4",
       tags: ["CALCIUM GLUCONATE", "B-COMPLEX", "VITAMIN C"],
       description: "Boost your overall wellness with a potent blend of Calcium Gluconate, B-Complex, and Vitamin C, designed to support energy levels, immune function, and overall health."
     },
     {
       title: "Ultra Recovery",
       price: "$125",
-      video: "/Animacionmorada.webm",
+      image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=800",
+      video: "/moranimado.mp4",
       tags: ["THIAMINE", "VITAMIN B2", "VITAMIN B6", "VITAMIN B12", "ELECTROLYTES", "RINGER LACTATE"],
       description: "Accelerate your recovery with a comprehensive blend of Thiamine, Vitamin B2, Vitamin B6, Vitamin B12, Electrolytes, and Ringer Lactate, designed to replenish essential nutrients and support optimal performance."
     }
@@ -839,11 +808,10 @@ const HowItWorks = () => {
             >
               <motion.div style={{ y: imgY, height: "130%", top: "-15%", position: "absolute", width: "100%" }}>
                 <img 
-                  src="/Outroweb.webp" 
+                  src="/Outroweb.jpg" 
                   alt="Home Care" 
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
-                  loading="lazy"
                 />
               </motion.div>
             </motion.div>
@@ -956,136 +924,6 @@ const Testimonials = () => {
   );
 };
 
-const Feedback = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-    rating: 5
-  });
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('loading');
-    try {
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (response.ok) {
-        setStatus('success');
-        setFormData({ name: '', email: '', message: '', rating: 5 });
-        setTimeout(() => setStatus('idle'), 5000);
-      } else {
-        setStatus('error');
-      }
-    } catch (error) {
-      setStatus('error');
-    }
-  };
-
-  return (
-    <section className="py-24 bg-[#0d0d0d]">
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="glass p-8 md:p-12 rounded-[3rem] border border-white/10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Share Your Experience</h2>
-            <p className="text-white/50">Your feedback helps us provide the best care possible.</p>
-          </div>
-
-          {status === 'success' ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-12"
-            >
-              <CheckCircle2 className="w-16 h-16 text-[#00ffff] mx-auto mb-6" />
-              <h3 className="text-2xl font-bold mb-2">Thank You!</h3>
-              <p className="text-white/50">Your feedback has been sent successfully.</p>
-            </motion.div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Name</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#00ffff]/50 transition-colors"
-                    placeholder="Your name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Email (Optional)</label>
-                  <input 
-                    type="email" 
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#00ffff]/50 transition-colors"
-                    placeholder="your@email.com"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Rating</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setFormData({...formData, rating: star})}
-                      className="focus:outline-none"
-                    >
-                      <Star 
-                        className={`w-8 h-8 transition-colors ${formData.rating >= star ? 'text-[#00ffff] fill-[#00ffff]' : 'text-white/20'}`} 
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Your Experience</label>
-                <textarea 
-                  required
-                  rows={4}
-                  value={formData.message}
-                  onChange={(e) => setFormData({...formData, message: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#00ffff]/50 transition-colors resize-none"
-                  placeholder="Tell us about your treatment..."
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={status === 'loading'}
-                className="w-full py-5 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-              >
-                {status === 'loading' ? 'Sending...' : (
-                  <>
-                    Send Feedback
-                    <Send className="w-5 h-5" />
-                  </>
-                )}
-              </button>
-              
-              {status === 'error' && (
-                <p className="text-red-400 text-center text-sm">Something went wrong. Please try again.</p>
-              )}
-            </form>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-
 const CTA = () => {
   const ref = React.useRef(null);
   const { scrollYProgress } = useScroll({
@@ -1124,89 +962,6 @@ const CTA = () => {
   );
 };
 
-const FAQ = () => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
-  const faqs = [
-    {
-      question: "What is IV Therapy?",
-      answer: "IV Therapy is a medical treatment that delivers fluids, vitamins, and minerals directly into your bloodstream. This bypasses the digestive system for 100% absorption and immediate results."
-    },
-    {
-      question: "How long does a session take?",
-      answer: "Most sessions take between 45 to 60 minutes, depending on the specific drip and your individual needs. Our professionals will monitor you throughout the entire process."
-    },
-    {
-      question: "Is it safe?",
-      answer: "Yes, IV therapy is very safe when administered by trained medical professionals. We use high-quality ingredients and follow strict medical protocols to ensure your safety and comfort."
-    },
-    {
-      question: "Who performs the treatment?",
-      answer: "All our treatments are performed exclusively by licensed physicians who specialize in IV administration, ensuring the highest level of medical expertise."
-    },
-    {
-      question: "How quickly will I feel the effects?",
-      answer: "Many clients report feeling an immediate boost in energy and hydration. Depending on the drip, full effects are typically felt within a few hours and can last for several days."
-    }
-  ];
-
-  return (
-    <section id="faqs" className="py-24 relative overflow-hidden bg-white/[0.02]">
-      <div className="max-w-3xl mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">FAQs</h2>
-          <p className="text-white/60 text-lg">Everything you need to know about our services.</p>
-        </motion.div>
-
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.03] backdrop-blur-sm"
-            >
-              <button
-                onClick={() => setActiveIndex(activeIndex === index ? null : index)}
-                className="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-              >
-                <span className="font-semibold text-lg pr-8">{faq.question}</span>
-                <motion.div
-                  animate={{ rotate: activeIndex === index ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChevronRight className="w-5 h-5 text-[#00ffff]" />
-                </motion.div>
-              </button>
-              <AnimatePresence>
-                {activeIndex === index && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <div className="px-6 pb-6 text-white/60 leading-relaxed">
-                      {faq.answer}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
 const Footer = () => {
   return (
     <footer id="contact" className="py-20 border-t border-white/5">
@@ -1216,7 +971,7 @@ const Footer = () => {
             <div className="flex items-center gap-3 mb-6">
               <div className="h-12 w-12 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/logo.webp" 
+                  src="/logo.png" 
                   alt="MDRIP Logo" 
                   className="h-full w-full object-contain mix-blend-screen brightness-125"
                   onError={(e) => {
@@ -1232,7 +987,8 @@ const Footer = () => {
             <div className="flex gap-4">
               {[
                 { Icon: Instagram, href: "https://www.instagram.com/mdrip.med/" },
-                { Icon: WhatsappIcon, href: "https://wa.me/573218210894" }
+                { Icon: Facebook, href: "#" },
+                { Icon: Twitter, href: "#" }
               ].map(({ Icon, href }, i) => (
                 <motion.a 
                   key={i} 
@@ -1272,10 +1028,10 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-6">Quick Links</h4>
             <ul className="space-y-4 text-white/40">
-              <li><a href="#services" className="hover:text-white transition-colors">Drip Menu</a></li>
-              <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
-              <li><a href="#about-us" className="hover:text-white transition-colors">About Us</a></li>
-              <li><a href="#faqs" className="hover:text-white transition-colors">FAQs</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Drip Menu</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Memberships</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Locations</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">FAQs</a></li>
             </ul>
           </div>
 
@@ -1320,9 +1076,11 @@ const Footer = () => {
 };
 
 
+import { AIChatbot } from './components/AIChatbot';
+
 export default function App() {
   return (
-    <div className="relative min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <Navbar />
       <main>
         <Hero />
@@ -1331,14 +1089,10 @@ export default function App() {
         <Services />
         <HowItWorks />
         <Testimonials />
-        <FAQ />
-        <Feedback />
         <CTA />
       </main>
       <Footer />
-      <Suspense fallback={null}>
-        <Chatbot />
-      </Suspense>
+      <AIChatbot />
     </div>
   );
 }
