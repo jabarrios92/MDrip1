@@ -128,7 +128,7 @@ export const Chatbot = () => {
         } else if (error.message.includes("404") || error.message.includes("not found")) {
           errorMessage = "Model not found. Please check if the model name is correct.";
         } else if (error.message.includes("quota") || error.message.includes("429")) {
-          errorMessage = "Quota exceeded. Please try again in a few minutes.";
+          errorMessage = "Quota exceeded (429). You have reached the usage limit of your Gemini API key. Please wait a minute or check your limits at https://aistudio.google.com/app/apikey";
         } else {
           // Show the actual error message to help the user debug
           errorMessage = `Connection Error: ${error.message}`;
@@ -173,7 +173,7 @@ export const Chatbot = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">MDrip Assistant</h3>
-                  <p className="text-xs text-[#00ffff]">Online (v1.2)</p>
+                  <p className="text-xs text-[#00ffff]">Online (v1.3)</p>
                 </div>
               </div>
               <button 
