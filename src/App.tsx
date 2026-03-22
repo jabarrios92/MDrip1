@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
 import { 
   Droplets, 
@@ -1449,11 +1450,9 @@ const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') =>
 
 
 import { Chatbot } from './components/Chatbot';
-
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Links from './pages/Links';
 
-function MainApp() {
+function HomePage() {
   const [policyType, setPolicyType] = useState<'privacy' | 'terms' | null>(null);
 
   return (
@@ -1485,12 +1484,12 @@ function MainApp() {
 
 export default function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainApp />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/links" element={<Links />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
 
