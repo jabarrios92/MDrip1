@@ -1450,7 +1450,10 @@ const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') =>
 
 import { Chatbot } from './components/Chatbot';
 
-export default function App() {
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Links from './pages/Links';
+
+function MainApp() {
   const [policyType, setPolicyType] = useState<'privacy' | 'terms' | null>(null);
 
   return (
@@ -1477,6 +1480,17 @@ export default function App() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainApp />} />
+        <Route path="/links" element={<Links />} />
+      </Routes>
+    </Router>
   );
 }
 
