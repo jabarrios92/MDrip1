@@ -791,29 +791,29 @@ const Services = () => {
       title: "Immunity Boost",
       price: "$130 USD",
       video: "/Animacionamarilla.webm",
-      tags: ["Vitamin C", "Electrolytes", "Antioxidants"],
-      description: "Strengthen your body’s natural defenses with a treatment centered around high-dose Vitamin C, a potent antioxidant known for its role in immune health, cellular protection, and inflammation reduction. Perfect for staying healthy during travel or when feeling run down."
+      tags: ["CALCIUM GLUCONATE", "B-COMPLEX", "VITAMIN C"],
+      description: "Strengthen your body’s natural defenses with a treatment centered around Calcium Gluconate, B-Complex, and Vitamin C. This potent blend is designed to fortify the immune system, support cellular function, and reduce inflammation."
     },
     {
       title: "The Hangover Cure",
       price: "$120 USD",
       video: "/Animacionazul.webm",
-      tags: ["RINGER LACTATE", "B-Complex", "THIAMINE"],
-      description: "Recover quickly from a night out with our specialized hangover treatment, designed to rehydrate, replenish nutrients, and soothe nausea."
+      tags: ["ELECTROLYTES", "ANTI-NAUSEA", "REHYDRATION"],
+      description: "Recover quickly from a night out with our specialized hangover treatment. Designed to rehydrate with electrolytes and flush toxins with anti-nausea medication to restore your balance fast."
     },
     {
       title: "Myers Cocktail",
       price: "$135 USD",
       video: "/Animacionverde.webm",
       tags: ["CALCIUM GLUCONATE", "B-COMPLEX", "VITAMIN C"],
-      description: "Boost your overall wellness with a potent blend of Calcium Gluconate, B-Complex, and Vitamin C, designed to support energy levels, immune function, and overall health."
+      description: "The gold standard for total cellular restoration. This potent blend of Calcium Gluconate, B-Complex, and Vitamin C is designed to support energy levels, immune function, and relax your muscles."
     },
     {
       title: "Ultra Recovery",
       price: "$125 USD",
       video: "/Animacionmorada.webm",
       tags: ["THIAMINE", "VITAMIN B2", "VITAMIN B6", "VITAMIN B12", "ELECTROLYTES", "RINGER LACTATE"],
-      description: "Accelerate your recovery with a comprehensive blend of Thiamine, Vitamin B2, Vitamin B6, Vitamin B12, Electrolytes, and Ringer Lactate, designed to replenish essential nutrients and support optimal performance."
+      description: "Accelerate your recovery with a comprehensive blend of Thiamine, Vitamin B2, Vitamin B6, Vitamin B12, and electrolytes in a ringer lactate solution, specifically designed to combat travel-induced fatigue."
     }
   ];
 

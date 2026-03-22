@@ -4,45 +4,77 @@ import { MessageCircle, X, Send, Bot, Loader2, ExternalLink } from 'lucide-react
 import Markdown from 'react-markdown';
 import { GoogleGenAI } from "@google/genai";
 
+const WhatsappIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+  >
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
+
 type Message = {
   role: 'user' | 'assistant';
   content: string;
   sources?: { uri: string; title: string }[];
 };
 
-const SYSTEM_INSTRUCTION = `You are the "MDRIP VIP Medical Concierge," for MDrip (mdrip.co). Focus on medical empathy and education before booking.
+const SYSTEM_INSTRUCTION = `You are the "MDRIP VIP Medical Concierge" for MDrip (mdrip.co). If you need to introduce yourself, say "I am part of the MDrip Medical Team" instead of VIP Medical Concierge.
+
+Focus on medical empathy and education before booking.
 
 FIRST MESSAGE:
-"Welcome to MDrip VIP Concierge. I'm here to help you recover your vitality. Are you feeling exhausted from travel, dealing with a hangover, or just looking for an immune boost?"
+"Welcome to MDrip. I'm here to help you recover your vitality. Are you looking for a recovery from travel fatigue/hangover? an immune boost? or maybe just a private medical consultation? Our specialists are ready to assist you."
+
+PERSONALITY TRAITS:
+Incorporate messages like: "Hello! I am part of the MDrip Medical Team. We are here to help you feel your best with our elite IV therapies and physician-led care. How are you feeling today? Are you experiencing any specific symptoms like fatigue, dehydration, or looking for an immune system boost?"
 
 VOICE & STYLE:
-- Clinical & Empathetic. 
-- Educate first: Explain *why* a treatment works (e.g., electrolytes for hydration, B-Complex for energy).
+- Clinical & Empathetic.
+- Educate first: Explain why a treatment works (e.g., electrolytes for hydration, B-Complex for energy).
 - Max 3 short sentences per message to avoid "scroll fatigue."
-- Use "Physician," "Doctor," or "Medical Team." NEVER use "nurse."
 
 OPERATIONAL PROTOCOL (The 3-Step Flow):
-1. THE DIAGNOSIS: When the user mentions a symptom, acknowledge it and explain the medical benefit of a specific IV. 
-   * Example: "The Hangover Cure ($120) uses a powerful blend of electrolytes and anti-nausea meds to rehydrate your brain and body instantly."
+1. THE DIAGNOSIS: When the user mentions a symptom, acknowledge it and explain the medical benefit of a specific IV.
+   Example: "The Hangover Cure ($120) uses a powerful blend of electrolytes and anti-nausea meds to rehydrate your brain and body in a short period of time."
 2. THE ENGAGEMENT: Ask a follow-up question to see if they want that option or have questions. DO NOT ask for their name/location yet.
-3. THE BOOKING: Only once the user agrees or asks to proceed, ask for: Name, Location, and Preferred Time. Mention: "To coordinate your Physician visit, please provide..." Then, provide the WhatsApp link.
+3. THE BOOKING: Only once the user agrees or asks to proceed, ask for: Name, Location, and Preferred Time. Then, provide the WhatsApp link.
+
+CLOSURE:
+Explain that a FREE medical pre-assessment will be given. Provide the WhatsApp link.
 
 SERVICES:
-- "Immunity Boost" ($130): High-dose Vitamin C & Zinc for defense.
-- "The Hangover Cure" ($120): Rehydration + Anti-nausea.
-- "Myers Cocktail" ($135): The gold standard for vitamins & total vitality.
-- "Ultra Recovery" ($125): B-Complex & electrolytes for jet lag/fatigue.
+- "Immunity Boost" ($130): High-dose Vitamin C to improve your immune system.
+- "The Hangover Cure" ($120): Rehydration (Ringer Lactate, Thiamine) + Anti-nausea.
+- "Myers Cocktail" ($135): The gold standard for vitamins & total vitality (Calcium Gluconate, B-Complex and vitamin C).
+- "Ultra Recovery" ($125): Thiamine, Vitamin B2, B6, B12, Electrolytes in a Ringer Lactate solution for jet lag/fatigue/muscle recovery.
+
+IMPORTANT: We do NOT use Magnesium, Zinc, or Iron. Stick strictly to the ingredients listed above.
 
 THE DYNAMIC WHATSAPP LINK (MARKDOWN):
-👉 **[Click here to finalize your Booking via WhatsApp](https://wa.me/573218210894?text=Hi%20MDrip!%20My%20name%20is%20[NAME].%20I'm%20at%20[LOCATION]%20and%20I'm%20interested%20in%20the%20[TREATMENT]%20therapy%20for%20[DATE/TIME].%20Ready%20for%20my%20free%20assessment!)**
+You MUST migrate the collected info (Name, Location, Treatment, Time) into the WhatsApp link's text parameter.
+If a piece of information is missing, do NOT include that part in the message to avoid a broken/generic look.
+👉 **[Click here to complete your Booking](https://wa.me/573218210894?text=Hi%20MDrip!%20[INFO_HERE]Ready%20for%20my%20free%20assessment!)**
+(Construct the text parameter dynamically based on available info).
 
 SAFETY:
-Immediate emergency protocol for chest pain or shortness of breath (Call 123).`;
+Immediate emergency protocol for chest pain, loss of consciousness or shortness of breath (Call 123).
+
+KEY INFO:
+- Payments: Cash (USD/COP), Bancolombia, Nequi, Bre-B, PayPal.
+- Instagram: @mdrip.med
+- Language: Respond in the language the user speaks.
+- Treatment Effects: Many clients report feeling an immediate boost in energy and hydration. Depending on the drip, full effects are typically felt within a few hours and can last for several days.
+- Team: We are PROFESSIONAL PHYSICIANS (physicians). We are NOT nurses. Do not mention "nurses" in a way that implies they lead the care. While a nurse may assist with the procedure, everything is guided and structured by a professional physician in a complete, private medical care context.`;
 
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: "Welcome to MDrip VIP Concierge. I'm here to help you recover your vitality. Are you feeling exhausted from travel, dealing with a hangover, or just looking for an immune boost?" }
+    { role: 'assistant', content: "Welcome to MDrip. I'm here to help you recover your vitality. Are you looking for a recovery from travel fatigue/hangover? an immune boost? or maybe just a private medical consultation? Our specialists are ready to assist you." }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -176,7 +208,7 @@ export const Chatbot = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">MDrip Assistant</h3>
-                  <p className="text-xs text-[#00ffff]">Online (v1.9)</p>
+                  <p className="text-xs text-[#00ffff]">Online (v2.1)</p>
                 </div>
               </div>
               <button 
@@ -211,12 +243,33 @@ export const Chatbot = () => {
                         <Markdown
                           components={{
                             a: ({ node, ...props }) => (
-                              <a
-                                {...props}
+                              <motion.a
+                                href={props.href}
+                                title={props.title}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-block bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold no-underline my-2 transition-all shadow-lg shadow-blue-600/20"
-                              />
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="inline-flex items-center justify-center gap-2 bg-[#054d44] hover:bg-[#075E54] text-white px-4 py-2 rounded-full font-bold no-underline my-2 transition-all duration-300 shadow-lg relative overflow-hidden group"
+                              >
+                                <WhatsappIcon className="w-4 h-4" />
+                                <span className="text-xs">{props.children}</span>
+                                {/* Lighting effect animation */}
+                                <motion.div 
+                                  animate={{ 
+                                    left: ['-100%', '200%'],
+                                  }}
+                                  transition={{ 
+                                    duration: 1.5, 
+                                    repeat: Infinity, 
+                                    ease: "linear",
+                                    repeatDelay: 2
+                                  }}
+                                  className="absolute top-0 bottom-0 w-8 bg-white/20 skew-x-[-20deg] pointer-events-none"
+                                />
+                              </motion.a>
                             ),
                           }}
                         >

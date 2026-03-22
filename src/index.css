@@ -105,6 +105,22 @@
   pointer-events: none;
 }
 
+@keyframes shine {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+.animate-shine {
+  animation: shine 3s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(18, 140, 126, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(18, 140, 126, 0.8); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
