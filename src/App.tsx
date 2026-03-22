@@ -936,28 +936,24 @@ const HowItWorks = () => {
 const Testimonials = () => {
   const testimonials = [
     {
-      quote: "MDrip saved my vacation! I was feeling terrible after a long flight and a bit of altitude sickness. The doctor arrived at my Airbnb within an hour and I felt like a new person shortly after the infusion.",
+      quote: "Honestly, MDrip saved my trip. I was feeling absolutely wrecked after my flight and some altitude issues. The doc was at my Airbnb in like 45 mins and I felt 100% better right after. Total lifesaver!",
       author: "Sarah J.",
-      role: "Traveler",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200"
+      role: "Traveler"
     },
     {
-      quote: "Professional, discreet, and incredibly convenient. As a digital nomad in Medellín, having this service available 24/7 is a game changer. Highly recommend the Energy & Focus drip.",
+      quote: "Super professional and low-key. Being a nomad here in Medellin, having this 24/7 is a total game changer. That Energy & Focus drip is the real deal, highly recommend it.",
       author: "Michael T.",
-      role: "Digital Nomad",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"
+      role: "Digital Nomad"
     },
     {
-      quote: "The medical evaluation was very thorough. I felt safe and well-cared for. Much better than having to navigate a local hospital for something that could be treated at home.",
+      quote: "The check-up was actually really thorough, so I felt totally safe. Way better than trying to figure out a hospital here for something that can just be handled at home.",
       author: "Elena R.",
-      role: "Resident",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200"
+      role: "Resident"
     },
     {
-      quote: "Excellent service. The team is punctual and the equipment is top-notch. The hydration therapy really helped me recover after a weekend of hiking in Guatapé.",
+      quote: "Great service. They showed up right on time and everything was super clean. The hydration therapy was exactly what I needed after a long weekend hiking in Guatapé.",
       author: "David L.",
-      role: "Adventure Traveler",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200"
+      role: "Adventure Traveler"
     }
   ];
 
@@ -986,9 +982,6 @@ const Testimonials = () => {
                   <div className="glass p-8 md:p-12 rounded-[2.5rem] border border-white/10 relative">
                     <Quote className="absolute top-8 right-8 w-12 h-12 text-[#00ffff]/10" />
                     <div className="flex flex-col items-center text-center">
-                      <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#00ffff]/20 mb-6">
-                        <img src={t.image} alt={t.author} className="w-full h-full object-cover" />
-                      </div>
                       <p className="text-xl md:text-2xl text-white/90 italic mb-8 leading-relaxed">
                         "{t.quote}"
                       </p>
