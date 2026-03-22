@@ -226,7 +226,7 @@ const Hero = () => {
             Book Now
           </a>
           <a 
-            href="#about"
+            href="#how-it-works"
             className="w-full sm:w-auto px-10 py-4 glass hover:bg-white/10 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)] hover:border-[#00ffff]/50 hover:text-[#00ffff] text-white font-bold rounded-full transition-all duration-300 text-lg text-center"
           >
             How it Works
