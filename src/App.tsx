@@ -421,8 +421,8 @@ const ServiceCard: React.FC<{ s: any, i: number, isExpanded: boolean, onToggle: 
       }}
       className={`group cursor-pointer p-4 rounded-[2.5rem] border transition-all duration-500 backdrop-blur-sm ${
         isExpanded 
-          ? 'bg-white/[0.08] border-[#00ffff]/40 shadow-[0_0_50px_rgba(0,255,255,0.1)]' 
-          : 'bg-white/[0.03] border-white/10 hover:border-[#00ffff]/30'
+          ? 'bg-[#000000] border-[#00ffff]/40 shadow-[0_0_50px_rgba(0,255,255,0.1)]' 
+          : 'bg-[#000000] border-white/10 hover:border-[#00ffff]/30'
       }`}
       onClick={onToggle}
       onMouseMove={handleMouseMove}
@@ -791,15 +791,15 @@ const Services = () => {
       title: "Immunity Boost",
       price: "$130 USD",
       video: "/Animacionamarilla.webm",
-      tags: ["CALCIUM GLUCONATE", "B-COMPLEX", "VITAMIN C"],
-      description: "Strengthen your body’s natural defenses with a treatment centered around Calcium Gluconate, B-Complex, and Vitamin C. This potent blend is designed to fortify the immune system, support cellular function, and reduce inflammation."
+      tags: ["HIGH-DOSE VITAMIN C", "ELECTROLYTES"],
+      description: "Strengthen your body’s natural defenses with a treatment centered around High-dose Vitamin C and Electrolytes. This potent blend is designed to fortify the immune system, support cellular function, and reduce inflammation."
     },
     {
       title: "The Hangover Cure",
       price: "$120 USD",
       video: "/Animacionazul.webm",
-      tags: ["ELECTROLYTES", "ANTI-NAUSEA", "REHYDRATION"],
-      description: "Recover quickly from a night out with our specialized hangover treatment. Designed to rehydrate with electrolytes and flush toxins with anti-nausea medication to restore your balance fast."
+      tags: ["RINGER LACTATE", "THIAMINE", "ANTI-NAUSEA"],
+      description: "Recover quickly from a night out with our specialized hangover treatment. Designed to rehydrate with Ringer Lactate and Thiamine, and flush toxins with anti-nausea medication to restore your balance fast."
     },
     {
       title: "Myers Cocktail",
@@ -842,13 +842,6 @@ const Services = () => {
 };
 
 const HowItWorks = () => {
-  const ref = React.useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"]
-  });
-  const imgY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
-
   const steps = [
     {
       num: "1",
@@ -875,58 +868,37 @@ const HowItWorks = () => {
   return (
     <section id="how-it-works" className="py-24 bg-white/5 relative">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-8">How it Works</h2>
-            <div className="space-y-12">
-              {steps.map((step, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  whileHover="hover"
-                  className="flex gap-6 group cursor-pointer"
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">How it Works</h2>
+          <div className="space-y-12">
+            {steps.map((step, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                whileHover="hover"
+                className="flex gap-6 group cursor-pointer"
+              >
+                <motion.span 
+                  variants={{
+                    hover: { 
+                      color: "#00ffff", 
+                      textShadow: "0 0 25px rgba(0, 255, 255, 0.8)",
+                      scale: 1.15,
+                      opacity: 1
+                    }
+                  }}
+                  className="text-4xl font-serif italic text-[#00ffff]/30 font-bold transition-all duration-500"
                 >
-                  <motion.span 
-                    variants={{
-                      hover: { 
-                        color: "#00ffff", 
-                        textShadow: "0 0 25px rgba(0, 255, 255, 0.8)",
-                        scale: 1.15,
-                        opacity: 1
-                      }
-                    }}
-                    className="text-4xl font-serif italic text-[#00ffff]/30 font-bold transition-all duration-500"
-                  >
-                    {step.num}
-                  </motion.span>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-[#00ffff] transition-colors duration-500">{step.title}</h3>
-                    <p className="text-white/50 group-hover:text-white/80 transition-colors duration-500">{step.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-          <div className="relative" ref={ref}>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              className="relative z-10 rounded-3xl overflow-hidden shadow-2xl shadow-cyan-500/10 aspect-[4/5]"
-            >
-              <motion.div style={{ y: imgY, height: "130%", top: "-15%", position: "absolute", width: "100%" }}>
-                <img 
-                  src="/Outroweb.webp" 
-                  alt="Home Care" 
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
-                />
+                  {step.num}
+                </motion.span>
+                <div>
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-[#00ffff] transition-colors duration-500">{step.title}</h3>
+                  <p className="text-white/50 group-hover:text-white/80 transition-colors duration-500">{step.desc}</p>
+                </div>
               </motion.div>
-            </motion.div>
-            <div className="absolute -top-10 -right-10 w-64 h-64 bg-[#008080]/20 blur-3xl rounded-full z-0" />
-            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-[#00ffff]/10 blur-3xl rounded-full z-0" />
+            ))}
           </div>
         </div>
       </div>
