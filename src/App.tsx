@@ -49,7 +49,7 @@ const FadeInParallax = ({ children, delay = 0 }: { children: React.ReactNode, de
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ once: true, margin: "0px" }}
       transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
@@ -277,7 +277,7 @@ const Hero = () => {
           transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="text-xl md:text-2xl text-white/60 mb-10 max-w-2xl mx-auto font-light"
         >
-          Experience professional medical hydration and wellness treatments in the comfort of your home.
+          Experience professional medical care and wellness treatments in the comfort of your home.
         </motion.p>
 
         <motion.div 
@@ -504,7 +504,7 @@ const ServiceCard: React.FC<{ s: any, i: number, isExpanded: boolean, onToggle: 
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0, rootMargin: "200px" }
     );
 
     if (cardRef.current) {
@@ -561,7 +561,8 @@ const ServiceCard: React.FC<{ s: any, i: number, isExpanded: boolean, onToggle: 
       ref={cardRef}
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ once: true, margin: "0px" }}
+      transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
       whileHover={{ 
         scale: 1.02,
         boxShadow: "0 0 40px rgba(0, 255, 255, 0.05)"
@@ -948,19 +949,19 @@ const Services = () => {
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Drip Menu</h2>
             <p className="text-white/50 max-w-xl mx-auto">Tailored infusions designed to help you feel your best, wherever you are.</p>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((s, i) => (
-              <ServiceCard 
-                key={i} 
-                s={s} 
-                i={i} 
-                isExpanded={expandedIndex === i}
-                onToggle={() => setExpandedIndex(expandedIndex === i ? null : i)}
-              />
-            ))}
-          </div>
         </FadeInParallax>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {services.map((s, i) => (
+            <ServiceCard 
+              key={i} 
+              s={s} 
+              i={i} 
+              isExpanded={expandedIndex === i}
+              onToggle={() => setExpandedIndex(expandedIndex === i ? null : i)}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -1056,25 +1057,27 @@ const HowItWorks = () => {
         <FadeInParallax>
           <div className="max-w-3xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">How it Works</h2>
-            <div className="space-y-12">
-              {steps.map((step, i) => {
-                const isIlluminated = currentIlluminatedIndex === i;
-                return (
-                <motion.div 
-                  key={i}
-                  ref={(el) => { itemRefs.current[i] = el; }}
-                  onMouseEnter={() => setHoveredIndex(i)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                  initial={{ opacity: 0.3, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: false, amount: 0.6 }}
-                  animate={{
-                    opacity: isIlluminated ? 1 : 0.5,
-                    x: isIlluminated ? 10 : 0
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="flex gap-6 group cursor-pointer"
-                >
+          </div>
+        </FadeInParallax>
+        <div className="max-w-3xl mx-auto space-y-12">
+          {steps.map((step, i) => {
+            const isIlluminated = currentIlluminatedIndex === i;
+            return (
+            <motion.div 
+              key={i}
+              ref={(el) => { itemRefs.current[i] = el; }}
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              initial={{ opacity: 0.3, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: false, amount: 0.6 }}
+              animate={{
+                opacity: isIlluminated ? 1 : 0.5,
+                x: isIlluminated ? 10 : 0
+              }}
+              transition={{ duration: 0.3 }}
+              className="flex gap-6 group cursor-pointer"
+            >
                   <motion.span 
                     animate={{
                       color: isIlluminated ? "#00ffff" : "rgba(0, 255, 255, 0.2)",
@@ -1109,9 +1112,7 @@ const HowItWorks = () => {
                   </div>
                 </motion.div>
               )})}
-            </div>
-          </div>
-        </FadeInParallax>
+        </div>
       </div>
     </section>
   );
@@ -1221,9 +1222,10 @@ const TeamLeaders = () => {
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Team Leaders</h2>
             <p className="text-white/50 max-w-xl mx-auto">Meet the medical professionals dedicated to your wellness in Medellín.</p>
           </div>
+        </FadeInParallax>
 
-          <div className="flex flex-col lg:flex-row gap-4 h-[600px] lg:h-[500px]">
-            {leaders.map((leader, i) => {
+        <div className="flex flex-col lg:flex-row gap-4 h-[600px] lg:h-[500px]">
+          {leaders.map((leader, i) => {
               const isActive = activeIndex === i;
               const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : scrollIlluminatedIndex;
               const isIlluminated = isActive || currentIlluminatedIndex === i;
@@ -1240,7 +1242,15 @@ const TeamLeaders = () => {
                     boxShadow: isIlluminated ? "0 0 60px rgba(0, 255, 255, 0.15)" : "none",
                     transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
                   }}
-                  onClick={() => setActiveIndex(activeIndex === i ? null : i)}
+                  onClick={() => {
+                    const newIndex = activeIndex === i ? null : i;
+                    setActiveIndex(newIndex);
+                    if (newIndex !== null && cardRefs.current[i]) {
+                      setTimeout(() => {
+                        cardRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }
+                  }}
                   className={`relative rounded-[2.5rem] overflow-hidden cursor-pointer group border border-white/10 transition-colors duration-500 ${
                     isIlluminated ? 'border-[#00ffff]/30' : 'hover:border-white/20'
                   }`}
@@ -1335,8 +1345,7 @@ const TeamLeaders = () => {
                 </motion.div>
               );
             })}
-          </div>
-        </FadeInParallax>
+        </div>
       </div>
     </section>
   );
@@ -1664,13 +1673,23 @@ const faqs = [
 
 const FAQItem = React.memo(({ faq, index, activeIndex, setActiveIndex }: { faq: any, index: number, activeIndex: number | null, setActiveIndex: (i: number | null) => void }) => {
   const isOpen = activeIndex === index;
+  const itemRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen && itemRef.current) {
+      setTimeout(() => {
+        itemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [isOpen]);
 
   return (
     <motion.div
+      ref={itemRef}
       layout
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once: true, margin: "0px" }}
       transition={{ 
         duration: 0.4,
         delay: Math.min(index * 0.05, 0.3),
@@ -1734,19 +1753,19 @@ const FAQ = () => {
             <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">FAQs</h2>
             <p className="text-white/60 text-lg">Everything you need to know about our services.</p>
           </div>
-
-          <motion.div layout className="space-y-4">
-            {faqs.map((faq, index) => (
-              <FAQItem 
-                key={index} 
-                faq={faq} 
-                index={index} 
-                activeIndex={activeIndex} 
-                setActiveIndex={setActiveIndex} 
-              />
-            ))}
-          </motion.div>
         </FadeInParallax>
+
+        <motion.div layout className="space-y-4">
+          {faqs.map((faq, index) => (
+            <FAQItem 
+              key={index} 
+              faq={faq} 
+              index={index} 
+              activeIndex={activeIndex} 
+              setActiveIndex={setActiveIndex} 
+            />
+          ))}
+        </motion.div>
       </div>
     </section>
   );
@@ -1772,7 +1791,7 @@ const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') =>
               <span className="text-3xl font-bold tracking-tighter text-gradient">MDrip</span>
             </div>
             <p className="text-white/40 max-w-md mb-8">
-              Redefining wellness with premium home-care IV therapy. Professional, safe and discreet medical hydration delivered to your door.
+              Redefining wellness with premium home-care IV therapy. Professional, safe and discreet medical care delivered to your door.
             </p>
             <div className="flex gap-4">
               {[
@@ -1899,9 +1918,9 @@ function HomePage() {
         <AboutUs />
         <TeamLeaders />
         <Services />
-        <PaymentMethods />
         <HowItWorks />
         <Testimonials />
+        <PaymentMethods />
         <FAQ />
         <Feedback />
         <CTA />
