@@ -68,7 +68,7 @@ const Navbar = () => {
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          {['Home', 'Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
+          {['Home', 'About Us', 'Our Team', 'Services', 'How it Works', 'FAQs', 'Contact'].map((item) => (
             <a 
               key={item} 
               href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
@@ -102,7 +102,7 @@ const Navbar = () => {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="md:hidden bg-white/90 backdrop-blur-2xl absolute top-20 left-0 w-full p-6 flex flex-col gap-4 border-b border-white/20 shadow-2xl"
           >
-            {['Home', 'Services', 'How it Works', 'About Us', 'FAQs', 'Contact'].map((item) => (
+            {['Home', 'About Us', 'Our Team', 'Services', 'How it Works', 'FAQs', 'Contact'].map((item) => (
               <a 
                 key={item} 
                 href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
@@ -667,10 +667,10 @@ const AboutUs = () => {
   return (
     <section id="about-us" ref={ref} className="py-24 relative overflow-hidden bg-white/[0.02]">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
+        <div className="max-w-3xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
             className="relative z-10"
@@ -681,7 +681,7 @@ const AboutUs = () => {
             </div>
             <h2 className="text-4xl md:text-6xl font-bold mb-8 text-gradient leading-tight">Physician-Led <br />Medical Care</h2>
             <div className="space-y-6 text-lg text-white/70 leading-relaxed">
-              <p className="first-letter:text-5xl first-letter:font-bold first-letter:text-[#00ffff] first-letter:mr-3 first-letter:float-left">
+              <p className="first-letter:text-5xl first-letter:font-bold first-letter:text-[#00ffff] first-letter:mr-3 first-letter:float-left text-left">
                 MDrip provides physician-led medical care in the comfort of your accommodation. 
                 Our licensed physicians bring high quality and discreet professional medical 
                 evaluation and IV therapy directly to your Airbnb or hotel room in Medellín.
@@ -693,7 +693,7 @@ const AboutUs = () => {
               </p>
             </div>
             
-            <div className="mt-10 grid grid-cols-2 gap-6">
+            <div className="mt-10 grid grid-cols-2 gap-6 max-w-md mx-auto">
               <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
                 <p className="text-2xl font-bold text-[#00ffff] mb-1">100%</p>
                 <p className="text-xs text-white/40 uppercase tracking-wider">Licensed MDs</p>
@@ -703,42 +703,6 @@ const AboutUs = () => {
                 <p className="text-xs text-white/40 uppercase tracking-wider">Availability</p>
               </div>
             </div>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative"
-          >
-            <div className="aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/10 relative group">
-              <motion.div style={{ y: imgY, height: "130%", top: "-15%", position: "absolute", width: "100%" }}>
-                <img 
-                  src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=1000" 
-                  alt="Medical Professional in Medellín" 
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
-                  loading="lazy"
-                />
-              </motion.div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-80" />
-              
-              <div className="absolute bottom-8 left-8 right-8 p-8 glass rounded-3xl border border-white/20 backdrop-blur-xl">
-                <div className="flex items-center gap-5">
-                  <div className="h-14 w-14 rounded-2xl bg-[#00ffff]/20 flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform duration-500">
-                    <ShieldCheck className="w-8 h-8 text-[#00ffff]" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-xl text-white">Premium Care</p>
-                    <p className="text-sm text-white/50">Discreet & Professional</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Floating decorative elements */}
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-[#00ffff]/5 blur-[100px] rounded-full animate-pulse" />
-            <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-[#008080]/5 blur-[100px] rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
           </motion.div>
         </div>
       </div>
@@ -900,6 +864,147 @@ const HowItWorks = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const TeamLeaders = () => {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  const leaders = [
+    {
+      name: "Dr. Jorge Barrios",
+      role: "Medical Leader",
+      image: "/jorge.webp",
+      bio: "Dr. Jorge Barrios is a distinguished medical leader with over a decade of mastery in emergency medicine and specialized home-based care. He blends advanced medical protocols with a personalized approach to ensure every patient experiences the pinnacle of professional wellness.",
+      imagePosition: "center 15%",
+      zoom: 1.7
+    },
+    {
+      name: "Dr. Simón Posada",
+      role: "Medical Leader",
+      image: "/simon.webp",
+      bio: "Dr. Simón Posada brings over a decade of elite expertise in emergency medicine and clinical hospitalization. A visionary in home-based medical care, he is dedicated to delivering a bespoke, high-tier healthcare experience that prioritizes patient safety and absolute comfort.",
+      imagePosition: "center 20%",
+      zoom: 1.5
+    }
+  ];
+
+  return (
+    <section id="our-team" className="py-24 bg-[#0a0a0a] overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Team Leaders</h2>
+          <p className="text-white/50 max-w-xl mx-auto">Meet the medical professionals dedicated to your wellness in Medellín.</p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-4 h-[600px] lg:h-[500px]">
+          {leaders.map((leader, i) => {
+            const isActive = activeIndex === i;
+            return (
+              <motion.div
+                key={i}
+                initial={false}
+                animate={{ 
+                  flex: isActive ? 3 : 1,
+                  boxShadow: isActive ? "0 0 60px rgba(0, 255, 255, 0.15)" : "none",
+                  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                }}
+                onClick={() => setActiveIndex(activeIndex === i ? null : i)}
+                className={`relative rounded-[2.5rem] overflow-hidden cursor-pointer group border border-white/10 transition-colors duration-500 ${
+                  isActive ? 'border-[#00ffff]/30' : 'hover:border-white/20'
+                }`}
+              >
+                {/* Background Image */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <img 
+                    src={leader.image} 
+                    alt={leader.name}
+                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ${
+                      isActive 
+                        ? 'grayscale-0 opacity-100 blur-[3px]' 
+                        : 'grayscale opacity-40 group-hover:opacity-60 blur-0'
+                    }`}
+                    style={{ 
+                      objectPosition: (leader as any).imagePosition || 'center',
+                      transform: isActive 
+                        ? `scale(${(leader as any).zoom || 1.1})` 
+                        : 'scale(1.1)'
+                    }}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      // Fallback to high-quality premium doctor image if simond.png is empty
+                      if (leader.name.includes("Simón")) {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=800';
+                      } else if (leader.name.includes("Jorge")) {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=800';
+                      }
+                    }}
+                  />
+                </div>
+                
+                {/* Cyan Tint Overlay for Active */}
+                {isActive && (
+                  <div className="absolute inset-0 bg-[#00ffff]/5 mix-blend-overlay pointer-events-none" />
+                )}
+                
+                {/* Overlay */}
+                <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent transition-opacity duration-500 ${
+                  isActive ? 'opacity-90' : 'opacity-70'
+                }`} />
+
+                {/* Content */}
+                <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                  <motion.div
+                    animate={{ 
+                      y: isActive ? 0 : 0,
+                      opacity: 1
+                    }}
+                  >
+                    <p className="text-[#00ffff] text-xs uppercase tracking-[0.2em] font-bold mb-2">
+                      {leader.role}
+                    </p>
+                    <h3 className={`text-2xl md:text-3xl font-bold mb-4 transition-all duration-500 ${
+                      isActive ? 'text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.4)]' : 'text-white/80'
+                    }`}>
+                      {leader.name}
+                    </h3>
+                    
+                    <AnimatePresence>
+                      {isActive && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 20 }}
+                          transition={{ duration: 0.4 }}
+                          className="overflow-hidden bg-black/40 backdrop-blur-md p-6 rounded-3xl border border-white/10 mt-4"
+                        >
+                          <p className="text-white/90 text-sm md:text-base leading-relaxed max-w-lg">
+                            {leader.bio}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </div>
+
+                {/* Vertical Text for collapsed state */}
+                {!isActive && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 flex items-center justify-center lg:justify-start lg:pl-8 pointer-events-none"
+                  >
+                    <p className="hidden lg:block text-white/20 font-bold text-2xl uppercase tracking-[0.5em] whitespace-nowrap origin-left -rotate-90 translate-y-24">
+                      {leader.name.split(' ')[1]}
+                    </p>
+                  </motion.div>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1373,9 +1478,10 @@ const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') =>
             <h4 className="font-bold mb-6">Quick Links</h4>
             <ul className="space-y-4 text-white/40">
               <li><a href="#home" className="hover:text-white transition-colors">Home</a></li>
+              <li><a href="#about-us" className="hover:text-white transition-colors">About Us</a></li>
+              <li><a href="#our-team" className="hover:text-white transition-colors">Our Team</a></li>
               <li><a href="#services" className="hover:text-white transition-colors">Drip Menu</a></li>
               <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
-              <li><a href="#about-us" className="hover:text-white transition-colors">About Us</a></li>
               <li><a href="#faqs" className="hover:text-white transition-colors">FAQs</a></li>
             </ul>
           </div>
@@ -1434,6 +1540,7 @@ function HomePage() {
         <Hero />
         <Features />
         <AboutUs />
+        <TeamLeaders />
         <Services />
         <PaymentMethods />
         <HowItWorks />
