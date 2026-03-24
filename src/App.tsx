@@ -70,14 +70,14 @@ const Navbar = () => {
           >
             <img 
               src="/logo.webp" 
-              alt="MDRIP Logo" 
+              alt="MDrip Logo" 
               className="h-full w-full object-contain mix-blend-screen brightness-125 contrast-125 drop-shadow-[0_0_10px_rgba(0,255,255,0.5)]"
               onError={(e) => {
                 e.currentTarget.src = 'https://picsum.photos/seed/medical/100/100';
               }}
             />
           </motion.div>
-          <span className="text-2xl font-bold tracking-tighter text-gradient hidden sm:block group-hover:brightness-125 transition-all">MDRIP</span>
+          <span className="text-2xl font-bold tracking-tighter text-gradient hidden sm:block group-hover:brightness-125 transition-all">MDrip</span>
         </a>
 
         <div className="hidden md:flex items-center gap-8">
@@ -109,37 +109,37 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: -20, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -20, height: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden absolute top-20 left-0 w-full overflow-hidden bg-[#0a0f12]/95 backdrop-blur-2xl border-b border-[#00ffff]/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="md:hidden absolute top-[88px] left-4 right-4 overflow-hidden bg-[#1a1c20]/80 backdrop-blur-3xl border border-white/10 shadow-2xl shadow-black/50 rounded-3xl z-50"
           >
-            <div className="p-6 flex flex-col gap-2">
+            <div className="p-5 flex flex-col gap-1">
               {['Home', 'About Us', 'Our Team', 'Services', 'How it Works', 'FAQs', 'Contact'].map((item, i) => (
                 <motion.a 
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.3, delay: i * 0.04, ease: "easeOut" }}
                   key={item} 
                   href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-lg font-medium text-white/70 hover:text-[#00ffff] hover:bg-white/5 px-4 py-3 rounded-xl transition-all flex items-center justify-between group"
+                  className="text-base font-medium text-white/80 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-2xl transition-all flex items-center justify-between group"
                   onClick={() => setIsOpen(false)}
                 >
                   {item}
-                  <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#00ffff]" />
+                  <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-white/50" />
                 </motion.a>
               ))}
               <motion.a 
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3, delay: 0.4, ease: "easeOut" }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.3, delay: 0.3, ease: "easeOut" }}
                 href="https://wa.me/573218210894"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 w-full py-4 bg-gradient-to-r from-[#008080] to-[#00ffff] hover:from-[#00ffff] hover:to-[#008080] text-black font-bold rounded-xl shadow-[0_0_20px_rgba(0,255,255,0.3)] text-center transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                className="mt-2 w-full py-4 bg-gradient-to-r from-[#008080] to-[#00ffff] hover:opacity-90 text-black font-semibold rounded-2xl shadow-lg shadow-teal-500/20 text-center transition-all duration-300 transform active:scale-[0.98]"
                 onClick={() => setIsOpen(false)}
               >
                 Book Now
@@ -163,8 +163,53 @@ const Hero = () => {
   const logoRotate = useTransform(smoothProgress, [0, 0.3], [0, -15]);
   const logoY = useTransform(smoothProgress, [0, 0.3], [0, 50]);
 
+  const ref = React.useRef<HTMLElement>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const btnRefs = React.useRef<(HTMLAnchorElement | null)[]>([]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ref.current) return;
+      
+      const sectionRect = ref.current.getBoundingClientRect();
+      if (sectionRect.top < window.innerHeight && sectionRect.bottom > 0) {
+        const centerY = window.innerHeight / 2;
+        let closestIndex = -1;
+        let minDistance = Infinity;
+
+        btnRefs.current.forEach((btn, index) => {
+          if (btn) {
+            const rect = btn.getBoundingClientRect();
+            const itemCenterY = rect.top + rect.height / 2;
+            const distance = Math.abs(centerY - itemCenterY);
+            
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestIndex = index;
+            }
+          }
+        });
+
+        if (minDistance < 250) {
+          setActiveIndex(closestIndex);
+        } else {
+          setActiveIndex(null);
+        }
+      } else {
+        setActiveIndex(null);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
+
   return (
-    <section id="home" className="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden">
+    <section ref={ref} id="home" className="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden">
       {/* Parallax Background */}
       <motion.div 
         style={{ y: bgY }}
@@ -179,7 +224,7 @@ const Hero = () => {
           className="absolute inset-0 bg-[url('/hero-bg.webp')] bg-cover bg-center"
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a]/50 to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a]/50 to-[#000000]" />
       </motion.div>
 
       <div 
@@ -242,16 +287,30 @@ const Hero = () => {
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <a 
+            ref={(el) => { btnRefs.current[0] = el; }}
+            onMouseEnter={() => setHoveredIndex(0)}
+            onMouseLeave={() => setHoveredIndex(null)}
             href="https://wa.me/573218210894"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto px-10 py-4 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-full transition-all duration-300 text-lg shadow-xl shadow-teal-500/20 text-center"
+            className={`w-full sm:w-auto px-10 py-4 font-bold rounded-full transition-all duration-300 text-lg shadow-xl text-center ${
+              currentIlluminatedIndex === 0
+                ? 'bg-[#00ffff] text-black shadow-teal-500/50 scale-105'
+                : 'bg-[#008080] text-white shadow-teal-500/20'
+            }`}
           >
             Book Now
           </a>
           <a 
+            ref={(el) => { btnRefs.current[1] = el; }}
+            onMouseEnter={() => setHoveredIndex(1)}
+            onMouseLeave={() => setHoveredIndex(null)}
             href="#how-it-works"
-            className="w-full sm:w-auto px-10 py-4 glass hover:bg-white/10 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)] hover:border-[#00ffff]/50 hover:text-[#00ffff] text-white font-bold rounded-full transition-all duration-300 text-lg text-center"
+            className={`w-full sm:w-auto px-10 py-4 glass font-bold rounded-full transition-all duration-300 text-lg text-center ${
+              currentIlluminatedIndex === 1
+                ? 'bg-white/10 shadow-[0_0_20px_rgba(0,255,255,0.4)] border-[#00ffff]/50 text-[#00ffff] scale-105'
+                : 'text-white border-transparent'
+            }`}
           >
             How it Works
           </a>
@@ -311,7 +370,8 @@ const Features = () => {
       const sectionRect = ref.current.getBoundingClientRect();
       // Only calculate if section is in view
       if (sectionRect.top < window.innerHeight && sectionRect.bottom > 0) {
-        const centerY = window.innerHeight / 2;
+        // Target the bottom 3/4 of the screen
+        const targetY = window.innerHeight * 0.75;
         let closestIndex = -1;
         let minDistance = Infinity;
 
@@ -319,7 +379,7 @@ const Features = () => {
           if (card) {
             const rect = card.getBoundingClientRect();
             const cardCenterY = rect.top + rect.height / 2;
-            const distance = Math.abs(centerY - cardCenterY);
+            const distance = Math.abs(targetY - cardCenterY);
             
             if (distance < minDistance) {
               minDistance = distance;
@@ -328,7 +388,12 @@ const Features = () => {
           }
         });
 
-        setActiveIndex(closestIndex);
+        // Only illuminate if the closest card is reasonably near the target point
+        if (minDistance < window.innerHeight * 0.4) {
+          setActiveIndex(closestIndex);
+        } else {
+          setActiveIndex(null);
+        }
       } else {
         setActiveIndex(null);
       }
@@ -342,9 +407,7 @@ const Features = () => {
   const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
 
   return (
-    <section ref={ref} className="py-16 bg-[#000000] relative overflow-hidden border-t border-white/5">
-      {/* Subtle Divider Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
+    <section ref={ref} className="py-16 bg-[#000000] relative overflow-hidden">
       
       <div className="max-w-7xl mx-auto px-6">
         <FadeInParallax>
@@ -384,10 +447,10 @@ const Features = () => {
                   scale: isIlluminated ? 1.02 : 1
                 }}
                 viewport={{ once: false, amount: 0.4 }}
-                transition={{ duration: 0.5 }}
-                className="p-8 rounded-3xl glass transition-all duration-500 border"
+                transition={{ duration: 0.2 }}
+                className={`p-8 rounded-3xl glass transition-all duration-200 border ${isIlluminated ? 'opacity-100' : 'opacity-60'}`}
               >
-                <div className={`w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] transition-all duration-500 ${isIlluminated ? 'scale-110 shadow-[0_0_20px_rgba(0,255,255,0.4)]' : ''}`}>
+                <div className={`w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] transition-all duration-200 ${isIlluminated ? 'scale-110 shadow-[0_0_20px_rgba(0,255,255,0.4)]' : ''}`}>
                   {f.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
@@ -770,14 +833,16 @@ const AboutUs = () => {
               <h2 className="text-4xl md:text-6xl font-bold mb-8 text-gradient leading-tight">Physician-Led <br />Medical Care</h2>
               <div className="space-y-6 text-lg text-white/70 leading-relaxed">
                 <p className="first-letter:text-5xl first-letter:font-bold first-letter:text-[#00ffff] first-letter:mr-3 first-letter:float-left text-left">
-                  MDrip provides physician-led medical care in the comfort of your accommodation. 
-                  Our licensed physicians bring high quality and discreet professional medical 
-                  evaluation and IV therapy directly to your Airbnb or hotel room in Medellín.
+                  MDrip provides high quality and discreet professional medical evaluation and IV therapy directly to your Airbnb or hotel room in Medellín.
                 </p>
-                <p>
-                  We specialize in medical treatment for travelers and residents who need 
-                  professional care without visiting a clinic. Every visit includes a thorough 
-                  medical evaluation to ensure IV therapy is safe and appropriate for your condition.
+                <p className="text-left">
+                  MDrip was born from a passion to practice medicine the right way. We grew tired of long waits in crowded emergency rooms, a healthcare system that reduces patient care to rushed 15-minute consultations and, above all, we hold a fervent belief that you deserve the absolute best.
+                </p>
+                <p className="text-left">
+                  We decided to reinvent the experience ourselves because there has to be a better way. Medicine should be practiced as it was always intended: caring for a human being, not just treating a collection of symptoms and numbers.
+                </p>
+                <p className="text-xl font-medium text-white pt-2 text-left">
+                  Let's create a better way to understand health. <em className="text-[#00ffff] italic font-semibold">Together.</em>
                 </p>
               </div>
               
@@ -910,16 +975,21 @@ const HowItWorks = () => {
     },
     {
       num: "2",
-      title: "Schedule via WhatsApp",
-      desc: "Contact us directly via WhatsApp to pick a time that works for you. No complex forms, just direct professional communication."
+      title: "Consult our AI Assistant",
+      desc: "Have questions? Use our intelligent chatbot to resolve doubts, learn about our treatments, and get personalized recommendations before booking."
     },
     {
       num: "3",
+      title: "Free Medical Pre-Evaluation",
+      desc: "Contact us via WhatsApp. You will always speak directly with a doctor for a free pre-evaluation to resolve any doubts, educate you on the process, and schedule your session."
+    },
+    {
+      num: "4",
       title: "We Come to You",
       desc: "A certified physician will assess you at your location."
     },
     {
-      num: "4",
+      num: "5",
       title: "Feel Better",
       desc: "Relax and enjoy your treatment. Most sessions take 45-60 minutes."
     }
@@ -929,6 +999,14 @@ const HowItWorks = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const itemRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -937,7 +1015,7 @@ const HowItWorks = () => {
       const sectionRect = ref.current.getBoundingClientRect();
       // Only calculate if section is in view
       if (sectionRect.top < window.innerHeight && sectionRect.bottom > 0) {
-        const centerY = window.innerHeight / 2;
+        const targetY = isMobile ? window.innerHeight * 0.75 : window.innerHeight / 2;
         let closestIndex = -1;
         let minDistance = Infinity;
 
@@ -945,7 +1023,7 @@ const HowItWorks = () => {
           if (item) {
             const rect = item.getBoundingClientRect();
             const itemCenterY = rect.top + rect.height / 2;
-            const distance = Math.abs(centerY - itemCenterY);
+            const distance = Math.abs(targetY - itemCenterY);
             
             if (distance < minDistance) {
               minDistance = distance;
@@ -954,7 +1032,11 @@ const HowItWorks = () => {
           }
         });
 
-        setActiveIndex(closestIndex);
+        if (minDistance < window.innerHeight * (isMobile ? 0.3 : 0.5)) {
+          setActiveIndex(closestIndex);
+        } else {
+          setActiveIndex(null);
+        }
       } else {
         setActiveIndex(null);
       }
@@ -963,7 +1045,7 @@ const HowItWorks = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMobile]);
 
   const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
 
@@ -990,7 +1072,7 @@ const HowItWorks = () => {
                     opacity: isIlluminated ? 1 : 0.5,
                     x: isIlluminated ? 10 : 0
                   }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.3 }}
                   className="flex gap-6 group cursor-pointer"
                 >
                   <motion.span 
@@ -999,8 +1081,8 @@ const HowItWorks = () => {
                       textShadow: isIlluminated ? "0 0 25px rgba(0, 255, 255, 0.8)" : "0 0 0px rgba(0, 255, 255, 0)",
                       scale: isIlluminated ? 1.15 : 1
                     }}
-                    transition={{ duration: 0.5 }}
-                    className="text-4xl font-serif italic font-bold transition-all duration-500"
+                    transition={{ duration: 0.3 }}
+                    className="text-4xl font-serif italic font-bold transition-all duration-300"
                   >
                     {step.num}
                   </motion.span>
@@ -1010,8 +1092,8 @@ const HowItWorks = () => {
                         color: isIlluminated ? "#00ffff" : "#ffffff",
                         textShadow: isIlluminated ? "0 0 20px rgba(0, 255, 255, 0.6)" : "0 0 0px rgba(0, 255, 255, 0)"
                       }}
-                      transition={{ duration: 0.5 }}
-                      className="text-xl font-bold mb-2 transition-colors duration-500"
+                      transition={{ duration: 0.3 }}
+                      className="text-xl font-bold mb-2 transition-colors duration-300"
                     >
                       {step.title}
                     </motion.h3>
@@ -1019,8 +1101,8 @@ const HowItWorks = () => {
                       animate={{
                         color: isIlluminated ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 255, 255, 0.4)"
                       }}
-                      transition={{ duration: 0.5 }}
-                      className="transition-colors duration-500"
+                      transition={{ duration: 0.3 }}
+                      className="transition-colors duration-300"
                     >
                       {step.desc}
                     </motion.p>
@@ -1037,6 +1119,79 @@ const HowItWorks = () => {
 
 const TeamLeaders = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [scrollIlluminatedIndex, setScrollIlluminatedIndex] = useState<number | null>(null);
+  
+  const ref = React.useRef<HTMLDivElement>(null);
+  const cardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleScroll = () => {
+      if (!ref.current) return;
+      
+      const targetY = window.innerHeight * 0.75;
+      let closestIndex = -1;
+      let minDistance = Infinity;
+
+      cardRefs.current.forEach((card, index) => {
+        if (card) {
+          const rect = card.getBoundingClientRect();
+          const cardCenterY = rect.top + rect.height / 2;
+          const distance = Math.abs(targetY - cardCenterY);
+          
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestIndex = index;
+          }
+        }
+      });
+
+      if (minDistance < window.innerHeight * 0.4) {
+        setScrollIlluminatedIndex(closestIndex);
+      } else {
+        setScrollIlluminatedIndex(null);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial check
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.intersectionRatio < 0.2) {
+            setActiveIndex(null);
+          }
+        });
+      },
+      { threshold: [0.2] }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const leaders = [
     {
@@ -1051,14 +1206,14 @@ const TeamLeaders = () => {
       name: "Dr. Simón Posada",
       role: "Medical Leader",
       image: "/simon.webp",
-      bio: "Dr. Simón Posada brings over a decade of elite expertise in emergency medicine and clinical hospitalization. A visionary in home-based medical care, he is dedicated to delivering a bespoke, high-tier healthcare experience that prioritizes patient safety and absolute comfort.",
+      bio: "Dr. Simón Posada brings over a decade of elite expertise in emergency medicine and clinical hospitalization, alongside extensive proficiency in IV treatments. A visionary in home-based medical care, he is dedicated to delivering a bespoke, high-tier healthcare experience that prioritizes patient safety and absolute comfort.",
       imagePosition: "center 20%",
       zoom: 1.5
     }
   ];
 
   return (
-    <section id="our-team" className="py-16 bg-[#000000] overflow-hidden border-t border-white/5 relative">
+    <section id="our-team" ref={ref} className="py-16 bg-[#000000] overflow-hidden border-t border-white/5 relative">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
       <div className="max-w-7xl mx-auto px-6">
         <FadeInParallax>
@@ -1070,36 +1225,44 @@ const TeamLeaders = () => {
           <div className="flex flex-col lg:flex-row gap-4 h-[600px] lg:h-[500px]">
             {leaders.map((leader, i) => {
               const isActive = activeIndex === i;
+              const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : scrollIlluminatedIndex;
+              const isIlluminated = isActive || currentIlluminatedIndex === i;
+              
               return (
                 <motion.div
                   key={i}
+                  ref={(el) => { cardRefs.current[i] = el; }}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
                   initial={false}
                   animate={{ 
                     flex: isActive ? 3 : 1,
-                    boxShadow: isActive ? "0 0 60px rgba(0, 255, 255, 0.15)" : "none",
+                    boxShadow: isIlluminated ? "0 0 60px rgba(0, 255, 255, 0.15)" : "none",
                     transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
                   }}
                   onClick={() => setActiveIndex(activeIndex === i ? null : i)}
                   className={`relative rounded-[2.5rem] overflow-hidden cursor-pointer group border border-white/10 transition-colors duration-500 ${
-                    isActive ? 'border-[#00ffff]/30' : 'hover:border-white/20'
+                    isIlluminated ? 'border-[#00ffff]/30' : 'hover:border-white/20'
                   }`}
                 >
                   {/* Background Image */}
                   <div className="absolute inset-0 overflow-hidden">
-                    <img 
+                    <motion.img 
                       src={leader.image} 
                       alt={leader.name}
-                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ${
-                        isActive 
-                          ? 'grayscale-0 opacity-100 blur-[3px]' 
+                      className={`absolute inset-0 w-full h-[130%] -top-[15%] object-cover transition-[filter,opacity] duration-1000 ${
+                        isIlluminated 
+                          ? `grayscale-0 opacity-100 ${isActive ? 'blur-[3px]' : 'blur-0'}` 
                           : 'grayscale opacity-40 group-hover:opacity-60 blur-0'
                       }`}
                       style={{ 
+                        y,
                         objectPosition: (leader as any).imagePosition || 'center',
-                        transform: isActive 
-                          ? `scale(${(leader as any).zoom || 1.1})` 
-                          : 'scale(1.1)'
                       }}
+                      animate={{
+                        scale: isActive ? ((leader as any).zoom || 1.1) : 1.1
+                      }}
+                      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         // Fallback to high-quality premium doctor image if simond.png is empty
@@ -1113,13 +1276,13 @@ const TeamLeaders = () => {
                   </div>
                   
                   {/* Cyan Tint Overlay for Active */}
-                  {isActive && (
+                  {isIlluminated && (
                     <div className="absolute inset-0 bg-[#00ffff]/5 mix-blend-overlay pointer-events-none" />
                   )}
                   
                   {/* Overlay */}
                   <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent transition-opacity duration-500 ${
-                    isActive ? 'opacity-90' : 'opacity-70'
+                    isIlluminated ? 'opacity-90' : 'opacity-70'
                   }`} />
 
                   {/* Content */}
@@ -1134,7 +1297,7 @@ const TeamLeaders = () => {
                         {leader.role}
                       </p>
                       <h3 className={`text-2xl md:text-3xl font-bold mb-4 transition-all duration-500 ${
-                        isActive ? 'text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.4)]' : 'text-white/80'
+                        isIlluminated ? 'text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.4)]' : 'text-white/80'
                       }`}>
                         {leader.name}
                       </h3>
@@ -1164,7 +1327,7 @@ const TeamLeaders = () => {
                       animate={{ opacity: 1 }}
                       className="absolute inset-0 flex items-center justify-center lg:justify-start lg:pl-8 pointer-events-none"
                     >
-                      <p className="hidden lg:block text-white/20 font-bold text-2xl uppercase tracking-[0.5em] whitespace-nowrap origin-left -rotate-90 translate-y-24">
+                      <p className={`hidden lg:block font-bold text-2xl uppercase tracking-[0.5em] whitespace-nowrap origin-left -rotate-90 translate-y-24 transition-colors duration-500 ${isIlluminated ? 'text-[#00ffff]/40' : 'text-white/20'}`}>
                         {leader.name.split(' ')[1]}
                       </p>
                     </motion.div>
@@ -1599,14 +1762,14 @@ const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') =>
               <div className="h-12 w-12 flex items-center justify-center overflow-hidden">
                 <img 
                   src="/logo.webp" 
-                  alt="MDRIP Logo" 
+                  alt="MDrip Logo" 
                   className="h-full w-full object-contain mix-blend-screen brightness-125"
                   onError={(e) => {
                     e.currentTarget.src = 'https://picsum.photos/seed/medical/100/100';
                   }}
                 />
               </div>
-              <span className="text-3xl font-bold tracking-tighter text-gradient">MDRIP</span>
+              <span className="text-3xl font-bold tracking-tighter text-gradient">MDrip</span>
             </div>
             <p className="text-white/40 max-w-md mb-8">
               Redefining wellness with premium home-care IV therapy. Professional, safe and discreet medical hydration delivered to your door.
@@ -1680,11 +1843,11 @@ const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') =>
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-[#00ffff]" strokeWidth={2.5} />
-                <span>Medellín, ANT. & Surrounding Areas</span>
+                <MapPin className="w-6 h-6 shrink-0 text-[#00ffff]" strokeWidth={2} />
+                <span>Medellín & Nearby Areas</span>
               </li>
               <li className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-[#00ffff]" strokeWidth={2.5} />
+                <Clock className="w-6 h-6 shrink-0 text-[#00ffff]" strokeWidth={2} />
                 <span>Available 24/7</span>
               </li>
             </ul>
@@ -1692,7 +1855,7 @@ const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') =>
         </div>
         
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/20 uppercase tracking-widest">
-          <p>© 2026 MDRIP IV THERAPY. ALL RIGHTS RESERVED.</p>
+          <p>© 2026 MDrip IV THERAPY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-8">
             <button onClick={() => onOpenPolicy('privacy')} className="hover:text-white transition-colors">Privacy Policy</button>
             <button onClick={() => onOpenPolicy('terms')} className="hover:text-white transition-colors">Terms of Service</button>
@@ -1820,11 +1983,11 @@ const PolicyModal: React.FC<{ type: 'privacy' | 'terms', onClose: () => void }> 
             <>
               <section>
                 <h3 className="text-white font-bold mb-3">1. Acceptance of Terms</h3>
-                <p>By accessing or using MDRIP's services, you agree to be bound by these Terms of Service. If you do not agree to all of these terms, do not use our services.</p>
+                <p>By accessing or using MDrip's services, you agree to be bound by these Terms of Service. If you do not agree to all of these terms, do not use our services.</p>
               </section>
               <section>
                 <h3 className="text-white font-bold mb-3">2. Medical Services</h3>
-                <p>MDRIP provides physician-led IV therapy. All treatments are subject to a medical evaluation by a licensed physician. We reserve the right to refuse service if a treatment is deemed unsafe or inappropriate for a client.</p>
+                <p>MDrip provides physician-led IV therapy. All treatments are subject to a medical evaluation by a licensed physician. We reserve the right to refuse service if a treatment is deemed unsafe or inappropriate for a client.</p>
               </section>
               <section>
                 <h3 className="text-white font-bold mb-3">3. Bookings and Cancellations</h3>
@@ -1832,7 +1995,7 @@ const PolicyModal: React.FC<{ type: 'privacy' | 'terms', onClose: () => void }> 
               </section>
               <section>
                 <h3 className="text-white font-bold mb-3">4. Limitation of Liability</h3>
-                <p>To the maximum extent permitted by law, MDRIP shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues.</p>
+                <p>To the maximum extent permitted by law, MDrip shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues.</p>
               </section>
               <section>
                 <h3 className="text-white font-bold mb-3">5. Governing Law</h3>
