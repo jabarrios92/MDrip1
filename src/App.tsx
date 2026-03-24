@@ -44,6 +44,19 @@ const WhatsappIcon = (props: any) => (
 
 // --- Components ---
 
+const FadeInParallax = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -96,31 +109,42 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden bg-white/90 backdrop-blur-2xl absolute top-20 left-0 w-full p-6 flex flex-col gap-4 border-b border-white/20 shadow-2xl"
+            initial={{ opacity: 0, y: -20, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -20, height: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="md:hidden absolute top-20 left-0 w-full overflow-hidden bg-[#0a0f12]/95 backdrop-blur-2xl border-b border-[#00ffff]/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
           >
-            {['Home', 'About Us', 'Our Team', 'Services', 'How it Works', 'FAQs', 'Contact'].map((item) => (
-              <a 
-                key={item} 
-                href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                className="text-lg font-medium text-black/80 hover:text-[#008080] transition-colors"
+            <div className="p-6 flex flex-col gap-2">
+              {['Home', 'About Us', 'Our Team', 'Services', 'How it Works', 'FAQs', 'Contact'].map((item, i) => (
+                <motion.a 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
+                  key={item} 
+                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="text-lg font-medium text-white/70 hover:text-[#00ffff] hover:bg-white/5 px-4 py-3 rounded-xl transition-all flex items-center justify-between group"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item}
+                  <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#00ffff]" />
+                </motion.a>
+              ))}
+              <motion.a 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3, delay: 0.4, ease: "easeOut" }}
+                href="https://wa.me/573218210894"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 w-full py-4 bg-gradient-to-r from-[#008080] to-[#00ffff] hover:from-[#00ffff] hover:to-[#008080] text-black font-bold rounded-xl shadow-[0_0_20px_rgba(0,255,255,0.3)] text-center transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                 onClick={() => setIsOpen(false)}
               >
-                {item}
-              </a>
-            ))}
-            <a 
-              href="https://wa.me/573218210894"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-3 bg-[#008080] text-white font-bold rounded-xl shadow-lg shadow-teal-500/20 text-center"
-              onClick={() => setIsOpen(false)}
-            >
-              Book Now
-            </a>
+                Book Now
+              </motion.a>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -158,8 +182,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a]/50 to-[#0a0a0a]" />
       </motion.div>
 
-      <motion.div 
-        style={{ y: textY, opacity }}
+      <div 
         className="relative z-10 max-w-5xl mx-auto px-6 text-center -mt-20 md:-mt-32"
       >
         <motion.div
@@ -233,7 +256,7 @@ const Hero = () => {
             How it Works
           </a>
         </motion.div>
-      </motion.div>
+      </div>
 
 
     </section>
@@ -241,7 +264,7 @@ const Hero = () => {
 };
 
 const Features = () => {
-  const ref = React.useRef(null);
+  const ref = React.useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"]
@@ -270,6 +293,10 @@ const Features = () => {
   ];
 
   const [isMobile, setIsMobile] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const cardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -277,41 +304,98 @@ const Features = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ref.current) return;
+      
+      const sectionRect = ref.current.getBoundingClientRect();
+      // Only calculate if section is in view
+      if (sectionRect.top < window.innerHeight && sectionRect.bottom > 0) {
+        const centerY = window.innerHeight / 2;
+        let closestIndex = -1;
+        let minDistance = Infinity;
+
+        cardRefs.current.forEach((card, index) => {
+          if (card) {
+            const rect = card.getBoundingClientRect();
+            const cardCenterY = rect.top + rect.height / 2;
+            const distance = Math.abs(centerY - cardCenterY);
+            
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestIndex = index;
+            }
+          }
+        });
+
+        setActiveIndex(closestIndex);
+      } else {
+        setActiveIndex(null);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial check
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
+
   return (
-    <section ref={ref} className="py-24 bg-[#0a0a0a] relative overflow-hidden">
+    <section ref={ref} className="py-16 bg-[#000000] relative overflow-hidden border-t border-white/5">
+      {/* Subtle Divider Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
+      
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-3 gap-12">
-          {features.map((f, i) => (
-            <motion.div 
-              key={i}
-              style={{ y: isMobile ? 0 : yTransforms[i] }}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ 
-                opacity: 1, 
-                y: 0,
-                ...(isMobile ? {
-                  transition: {
-                    y: {
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      duration: 3 + i,
-                      ease: "easeInOut"
+        <FadeInParallax>
+          <div className="grid md:grid-cols-3 gap-12">
+            {features.map((f, i) => {
+              const isIlluminated = currentIlluminatedIndex === i;
+              return (
+              <motion.div 
+                key={i}
+                ref={(el) => { cardRefs.current[i] = el; }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                style={{ y: isMobile ? 0 : yTransforms[i] }}
+                initial={{ 
+                  opacity: 0.3, 
+                  y: 20,
+                  borderColor: "rgba(255, 255, 255, 0.05)",
+                  boxShadow: "0px 0px 0px rgba(0, 255, 255, 0)"
+                }}
+                whileInView={{ 
+                  opacity: 1, 
+                  y: 0,
+                  ...(isMobile ? {
+                    transition: {
+                      y: {
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        duration: 3 + i,
+                        ease: "easeInOut"
+                      }
                     }
-                  }
-                } : {})
-              }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.2, duration: 0.8 }}
-              className="p-8 rounded-3xl glass hover:border-[#00ffff]/30 transition-all group"
-            >
-              <div className="w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] group-hover:scale-110 transition-transform">
-                {f.icon}
-              </div>
-              <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
-              <p className="text-white/50 leading-relaxed">{f.desc}</p>
-            </motion.div>
-          ))}
-        </div>
+                  } : {})
+                }}
+                animate={{
+                  borderColor: isIlluminated ? "rgba(0, 255, 255, 1)" : "rgba(255, 255, 255, 0.05)",
+                  boxShadow: isIlluminated ? "0px 0px 50px rgba(0, 255, 255, 0.3)" : "0px 0px 0px rgba(0, 255, 255, 0)",
+                  scale: isIlluminated ? 1.02 : 1
+                }}
+                viewport={{ once: false, amount: 0.4 }}
+                transition={{ duration: 0.5 }}
+                className="p-8 rounded-3xl glass transition-all duration-500 border"
+              >
+                <div className={`w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] transition-all duration-500 ${isIlluminated ? 'scale-110 shadow-[0_0_20px_rgba(0,255,255,0.4)]' : ''}`}>
+                  {f.icon}
+                </div>
+                <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
+                <p className="text-white/50 leading-relaxed">{f.desc}</p>
+              </motion.div>
+            )})}
+          </div>
+        </FadeInParallax>
       </div>
     </section>
   );
@@ -665,46 +749,51 @@ const AboutUs = () => {
   const imgY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
   return (
-    <section id="about-us" ref={ref} className="py-24 relative overflow-hidden bg-white/[0.02]">
+    <section id="about-us" ref={ref} className="py-16 relative overflow-hidden bg-[#000000] border-t border-white/5">
+      {/* Subtle Divider Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
+      
       <div className="max-w-7xl mx-auto px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative z-10"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00ffff]/10 border border-[#00ffff]/20 mb-6">
-              <span className="w-2 h-2 rounded-full bg-[#00ffff] animate-pulse" />
-              <span className="text-xs font-bold tracking-widest uppercase text-[#00ffff]">Our Mission</span>
-            </div>
-            <h2 className="text-4xl md:text-6xl font-bold mb-8 text-gradient leading-tight">Physician-Led <br />Medical Care</h2>
-            <div className="space-y-6 text-lg text-white/70 leading-relaxed">
-              <p className="first-letter:text-5xl first-letter:font-bold first-letter:text-[#00ffff] first-letter:mr-3 first-letter:float-left text-left">
-                MDrip provides physician-led medical care in the comfort of your accommodation. 
-                Our licensed physicians bring high quality and discreet professional medical 
-                evaluation and IV therapy directly to your Airbnb or hotel room in Medellín.
-              </p>
-              <p>
-                We specialize in medical treatment for travelers and residents who need 
-                professional care without visiting a clinic. Every visit includes a thorough 
-                medical evaluation to ensure IV therapy is safe and appropriate for your condition.
-              </p>
-            </div>
-            
-            <div className="mt-10 grid grid-cols-2 gap-6 max-w-md mx-auto">
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                <p className="text-2xl font-bold text-[#00ffff] mb-1">100%</p>
-                <p className="text-xs text-white/40 uppercase tracking-wider">Licensed MDs</p>
+        <FadeInParallax>
+          <div className="max-w-3xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative z-10"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00ffff]/10 border border-[#00ffff]/20 mb-6">
+                <span className="w-2 h-2 rounded-full bg-[#00ffff] animate-pulse" />
+                <span className="text-xs font-bold tracking-widest uppercase text-[#00ffff]">Our Mission</span>
               </div>
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                <p className="text-2xl font-bold text-[#00ffff] mb-1">24/7</p>
-                <p className="text-xs text-white/40 uppercase tracking-wider">Availability</p>
+              <h2 className="text-4xl md:text-6xl font-bold mb-8 text-gradient leading-tight">Physician-Led <br />Medical Care</h2>
+              <div className="space-y-6 text-lg text-white/70 leading-relaxed">
+                <p className="first-letter:text-5xl first-letter:font-bold first-letter:text-[#00ffff] first-letter:mr-3 first-letter:float-left text-left">
+                  MDrip provides physician-led medical care in the comfort of your accommodation. 
+                  Our licensed physicians bring high quality and discreet professional medical 
+                  evaluation and IV therapy directly to your Airbnb or hotel room in Medellín.
+                </p>
+                <p>
+                  We specialize in medical treatment for travelers and residents who need 
+                  professional care without visiting a clinic. Every visit includes a thorough 
+                  medical evaluation to ensure IV therapy is safe and appropriate for your condition.
+                </p>
               </div>
-            </div>
-          </motion.div>
-        </div>
+              
+              <div className="mt-10 grid grid-cols-2 gap-6 max-w-md mx-auto">
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <p className="text-2xl font-bold text-[#00ffff] mb-1">100%</p>
+                  <p className="text-xs text-white/40 uppercase tracking-wider">Licensed MDs</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <p className="text-2xl font-bold text-[#00ffff] mb-1">24/7</p>
+                  <p className="text-xs text-white/40 uppercase tracking-wider">Availability</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </FadeInParallax>
       </div>
     </section>
   );
@@ -716,33 +805,37 @@ const PaymentMethods = () => {
     { name: "Bancolombia", icon: <CreditCard className="w-6 h-6" />, desc: "Direct bank transfer" },
     { name: "Nequi", icon: <Smartphone className="w-6 h-6" />, desc: "Instant mobile payment" },
     { name: "Bre-B", icon: <Zap className="w-6 h-6" />, desc: "Instant bank transfer" },
-    { name: "PayPal", icon: <Globe className="w-6 h-6" />, desc: "International credit cards" }
+    { name: "PayPal", icon: <Globe className="w-6 h-6" />, desc: "International credit cards" },
+    { name: "Venmo", icon: <Smartphone className="w-6 h-6" />, desc: "US mobile payments" }
   ];
 
   return (
-    <section className="py-24 bg-white/[0.02]">
+    <section className="py-16 bg-[#000000] border-t border-white/5 relative">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Payment Methods</h2>
-          <p className="text-white/50 max-w-xl mx-auto">Flexible options for your convenience.</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {methods.map((m, i) => (
-            <motion.div 
-              key={i}
-              whileHover={{ y: -5, borderColor: "rgba(0, 255, 255, 0.3)" }}
-              className="p-8 rounded-3xl border border-white/10 bg-white/5 text-center flex flex-col items-center gap-4 transition-all"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-[#00ffff]/10 flex items-center justify-center text-[#00ffff]">
-                {m.icon}
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1">{m.name}</h3>
-                <p className="text-xs text-white/40 uppercase tracking-wider">{m.desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <FadeInParallax>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Payment Methods</h2>
+            <p className="text-white/50 max-w-xl mx-auto">Flexible options for your convenience.</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {methods.map((m, i) => (
+              <motion.div 
+                key={i}
+                whileHover={{ y: -5, borderColor: "rgba(0, 255, 255, 0.3)" }}
+                className="p-8 rounded-3xl border border-white/10 bg-white/5 text-center flex flex-col items-center gap-4 transition-all"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-[#00ffff]/10 flex items-center justify-center text-[#00ffff]">
+                  {m.icon}
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg mb-1">{m.name}</h3>
+                  <p className="text-xs text-white/40 uppercase tracking-wider">{m.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </FadeInParallax>
       </div>
     </section>
   );
@@ -782,24 +875,27 @@ const Services = () => {
   ];
 
   return (
-    <section id="services" className="py-24 relative">
+    <section id="services" className="py-16 relative bg-[#000000] border-t border-white/5">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Drip Menu</h2>
-          <p className="text-white/50 max-w-xl mx-auto">Tailored infusions designed to help you feel your best, wherever you are.</p>
-        </div>
+        <FadeInParallax>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Drip Menu</h2>
+            <p className="text-white/50 max-w-xl mx-auto">Tailored infusions designed to help you feel your best, wherever you are.</p>
+          </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((s, i) => (
-            <ServiceCard 
-              key={i} 
-              s={s} 
-              i={i} 
-              isExpanded={expandedIndex === i}
-              onToggle={() => setExpandedIndex(expandedIndex === i ? null : i)}
-            />
-          ))}
-        </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {services.map((s, i) => (
+              <ServiceCard 
+                key={i} 
+                s={s} 
+                i={i} 
+                isExpanded={expandedIndex === i}
+                onToggle={() => setExpandedIndex(expandedIndex === i ? null : i)}
+              />
+            ))}
+          </div>
+        </FadeInParallax>
       </div>
     </section>
   );
@@ -829,42 +925,111 @@ const HowItWorks = () => {
     }
   ];
 
+  const ref = React.useRef<HTMLElement>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const itemRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ref.current) return;
+      
+      const sectionRect = ref.current.getBoundingClientRect();
+      // Only calculate if section is in view
+      if (sectionRect.top < window.innerHeight && sectionRect.bottom > 0) {
+        const centerY = window.innerHeight / 2;
+        let closestIndex = -1;
+        let minDistance = Infinity;
+
+        itemRefs.current.forEach((item, index) => {
+          if (item) {
+            const rect = item.getBoundingClientRect();
+            const itemCenterY = rect.top + rect.height / 2;
+            const distance = Math.abs(centerY - itemCenterY);
+            
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestIndex = index;
+            }
+          }
+        });
+
+        setActiveIndex(closestIndex);
+      } else {
+        setActiveIndex(null);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial check
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
+
   return (
-    <section id="how-it-works" className="py-24 bg-white/5 relative">
+    <section ref={ref} id="how-it-works" className="py-16 bg-[#000000] relative border-t border-white/5">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
       <div className="max-w-7xl mx-auto px-6">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">How it Works</h2>
-          <div className="space-y-12">
-            {steps.map((step, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                whileHover="hover"
-                className="flex gap-6 group cursor-pointer"
-              >
-                <motion.span 
-                  variants={{
-                    hover: { 
-                      color: "#00ffff", 
-                      textShadow: "0 0 25px rgba(0, 255, 255, 0.8)",
-                      scale: 1.15,
-                      opacity: 1
-                    }
+        <FadeInParallax>
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">How it Works</h2>
+            <div className="space-y-12">
+              {steps.map((step, i) => {
+                const isIlluminated = currentIlluminatedIndex === i;
+                return (
+                <motion.div 
+                  key={i}
+                  ref={(el) => { itemRefs.current[i] = el; }}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  initial={{ opacity: 0.3, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: false, amount: 0.6 }}
+                  animate={{
+                    opacity: isIlluminated ? 1 : 0.5,
+                    x: isIlluminated ? 10 : 0
                   }}
-                  className="text-4xl font-serif italic text-[#00ffff]/30 font-bold transition-all duration-500"
+                  transition={{ duration: 0.5 }}
+                  className="flex gap-6 group cursor-pointer"
                 >
-                  {step.num}
-                </motion.span>
-                <div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-[#00ffff] transition-colors duration-500">{step.title}</h3>
-                  <p className="text-white/50 group-hover:text-white/80 transition-colors duration-500">{step.desc}</p>
-                </div>
-              </motion.div>
-            ))}
+                  <motion.span 
+                    animate={{
+                      color: isIlluminated ? "#00ffff" : "rgba(0, 255, 255, 0.2)",
+                      textShadow: isIlluminated ? "0 0 25px rgba(0, 255, 255, 0.8)" : "0 0 0px rgba(0, 255, 255, 0)",
+                      scale: isIlluminated ? 1.15 : 1
+                    }}
+                    transition={{ duration: 0.5 }}
+                    className="text-4xl font-serif italic font-bold transition-all duration-500"
+                  >
+                    {step.num}
+                  </motion.span>
+                  <div>
+                    <motion.h3 
+                      animate={{
+                        color: isIlluminated ? "#00ffff" : "#ffffff",
+                        textShadow: isIlluminated ? "0 0 20px rgba(0, 255, 255, 0.6)" : "0 0 0px rgba(0, 255, 255, 0)"
+                      }}
+                      transition={{ duration: 0.5 }}
+                      className="text-xl font-bold mb-2 transition-colors duration-500"
+                    >
+                      {step.title}
+                    </motion.h3>
+                    <motion.p 
+                      animate={{
+                        color: isIlluminated ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 255, 255, 0.4)"
+                      }}
+                      transition={{ duration: 0.5 }}
+                      className="transition-colors duration-500"
+                    >
+                      {step.desc}
+                    </motion.p>
+                  </div>
+                </motion.div>
+              )})}
+            </div>
           </div>
-        </div>
+        </FadeInParallax>
       </div>
     </section>
   );
@@ -893,119 +1058,122 @@ const TeamLeaders = () => {
   ];
 
   return (
-    <section id="our-team" className="py-24 bg-[#0a0a0a] overflow-hidden">
+    <section id="our-team" className="py-16 bg-[#000000] overflow-hidden border-t border-white/5 relative">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Team Leaders</h2>
-          <p className="text-white/50 max-w-xl mx-auto">Meet the medical professionals dedicated to your wellness in Medellín.</p>
-        </div>
+        <FadeInParallax>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Team Leaders</h2>
+            <p className="text-white/50 max-w-xl mx-auto">Meet the medical professionals dedicated to your wellness in Medellín.</p>
+          </div>
 
-        <div className="flex flex-col lg:flex-row gap-4 h-[600px] lg:h-[500px]">
-          {leaders.map((leader, i) => {
-            const isActive = activeIndex === i;
-            return (
-              <motion.div
-                key={i}
-                initial={false}
-                animate={{ 
-                  flex: isActive ? 3 : 1,
-                  boxShadow: isActive ? "0 0 60px rgba(0, 255, 255, 0.15)" : "none",
-                  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
-                }}
-                onClick={() => setActiveIndex(activeIndex === i ? null : i)}
-                className={`relative rounded-[2.5rem] overflow-hidden cursor-pointer group border border-white/10 transition-colors duration-500 ${
-                  isActive ? 'border-[#00ffff]/30' : 'hover:border-white/20'
-                }`}
-              >
-                {/* Background Image */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <img 
-                    src={leader.image} 
-                    alt={leader.name}
-                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ${
-                      isActive 
-                        ? 'grayscale-0 opacity-100 blur-[3px]' 
-                        : 'grayscale opacity-40 group-hover:opacity-60 blur-0'
-                    }`}
-                    style={{ 
-                      objectPosition: (leader as any).imagePosition || 'center',
-                      transform: isActive 
-                        ? `scale(${(leader as any).zoom || 1.1})` 
-                        : 'scale(1.1)'
-                    }}
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      // Fallback to high-quality premium doctor image if simond.png is empty
-                      if (leader.name.includes("Simón")) {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=800';
-                      } else if (leader.name.includes("Jorge")) {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=800';
-                      }
-                    }}
-                  />
-                </div>
-                
-                {/* Cyan Tint Overlay for Active */}
-                {isActive && (
-                  <div className="absolute inset-0 bg-[#00ffff]/5 mix-blend-overlay pointer-events-none" />
-                )}
-                
-                {/* Overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent transition-opacity duration-500 ${
-                  isActive ? 'opacity-90' : 'opacity-70'
-                }`} />
+          <div className="flex flex-col lg:flex-row gap-4 h-[600px] lg:h-[500px]">
+            {leaders.map((leader, i) => {
+              const isActive = activeIndex === i;
+              return (
+                <motion.div
+                  key={i}
+                  initial={false}
+                  animate={{ 
+                    flex: isActive ? 3 : 1,
+                    boxShadow: isActive ? "0 0 60px rgba(0, 255, 255, 0.15)" : "none",
+                    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                  }}
+                  onClick={() => setActiveIndex(activeIndex === i ? null : i)}
+                  className={`relative rounded-[2.5rem] overflow-hidden cursor-pointer group border border-white/10 transition-colors duration-500 ${
+                    isActive ? 'border-[#00ffff]/30' : 'hover:border-white/20'
+                  }`}
+                >
+                  {/* Background Image */}
+                  <div className="absolute inset-0 overflow-hidden">
+                    <img 
+                      src={leader.image} 
+                      alt={leader.name}
+                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ${
+                        isActive 
+                          ? 'grayscale-0 opacity-100 blur-[3px]' 
+                          : 'grayscale opacity-40 group-hover:opacity-60 blur-0'
+                      }`}
+                      style={{ 
+                        objectPosition: (leader as any).imagePosition || 'center',
+                        transform: isActive 
+                          ? `scale(${(leader as any).zoom || 1.1})` 
+                          : 'scale(1.1)'
+                      }}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        // Fallback to high-quality premium doctor image if simond.png is empty
+                        if (leader.name.includes("Simón")) {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=800';
+                        } else if (leader.name.includes("Jorge")) {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=800';
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Cyan Tint Overlay for Active */}
+                  {isActive && (
+                    <div className="absolute inset-0 bg-[#00ffff]/5 mix-blend-overlay pointer-events-none" />
+                  )}
+                  
+                  {/* Overlay */}
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent transition-opacity duration-500 ${
+                    isActive ? 'opacity-90' : 'opacity-70'
+                  }`} />
 
-                {/* Content */}
-                <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                  <motion.div
-                    animate={{ 
-                      y: isActive ? 0 : 0,
-                      opacity: 1
-                    }}
-                  >
-                    <p className="text-[#00ffff] text-xs uppercase tracking-[0.2em] font-bold mb-2">
-                      {leader.role}
-                    </p>
-                    <h3 className={`text-2xl md:text-3xl font-bold mb-4 transition-all duration-500 ${
-                      isActive ? 'text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.4)]' : 'text-white/80'
-                    }`}>
-                      {leader.name}
-                    </h3>
-                    
-                    <AnimatePresence>
-                      {isActive && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 20 }}
-                          transition={{ duration: 0.4 }}
-                          className="overflow-hidden bg-black/40 backdrop-blur-md p-6 rounded-3xl border border-white/10 mt-4"
-                        >
-                          <p className="text-white/90 text-sm md:text-base leading-relaxed max-w-lg">
-                            {leader.bio}
-                          </p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                </div>
+                  {/* Content */}
+                  <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                    <motion.div
+                      animate={{ 
+                        y: isActive ? 0 : 0,
+                        opacity: 1
+                      }}
+                    >
+                      <p className="text-[#00ffff] text-xs uppercase tracking-[0.2em] font-bold mb-2">
+                        {leader.role}
+                      </p>
+                      <h3 className={`text-2xl md:text-3xl font-bold mb-4 transition-all duration-500 ${
+                        isActive ? 'text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.4)]' : 'text-white/80'
+                      }`}>
+                        {leader.name}
+                      </h3>
+                      
+                      <AnimatePresence>
+                        {isActive && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            transition={{ duration: 0.4 }}
+                            className="overflow-hidden bg-black/40 backdrop-blur-md p-6 rounded-3xl border border-white/10 mt-4"
+                          >
+                            <p className="text-white/90 text-sm md:text-base leading-relaxed max-w-lg">
+                              {leader.bio}
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  </div>
 
-                {/* Vertical Text for collapsed state */}
-                {!isActive && (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="absolute inset-0 flex items-center justify-center lg:justify-start lg:pl-8 pointer-events-none"
-                  >
-                    <p className="hidden lg:block text-white/20 font-bold text-2xl uppercase tracking-[0.5em] whitespace-nowrap origin-left -rotate-90 translate-y-24">
-                      {leader.name.split(' ')[1]}
-                    </p>
-                  </motion.div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
+                  {/* Vertical Text for collapsed state */}
+                  {!isActive && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="absolute inset-0 flex items-center justify-center lg:justify-start lg:pl-8 pointer-events-none"
+                    >
+                      <p className="hidden lg:block text-white/20 font-bold text-2xl uppercase tracking-[0.5em] whitespace-nowrap origin-left -rotate-90 translate-y-24">
+                        {leader.name.split(' ')[1]}
+                      </p>
+                    </motion.div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        </FadeInParallax>
       </div>
     </section>
   );
@@ -1041,64 +1209,67 @@ const Testimonials = () => {
   const prev = () => setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-16 relative overflow-hidden bg-[#000000] border-t border-white/5">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">What Our Clients Say</h2>
-          <p className="text-white/50 max-w-xl mx-auto">Real experiences from travelers and residents in Medellín.</p>
-        </div>
+        <FadeInParallax>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">What Our Clients Say</h2>
+            <p className="text-white/50 max-w-xl mx-auto">Real experiences from travelers and residents in Medellín.</p>
+          </div>
 
-        <div className="relative max-w-4xl mx-auto">
-          <div className="overflow-hidden">
-            <motion.div 
-              className="flex"
-              animate={{ x: `-${currentIndex * 100}%` }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            >
-              {testimonials.map((t, i) => (
-                <div key={i} className="min-w-full px-4">
-                  <div className="glass p-8 md:p-12 rounded-[2.5rem] border border-white/10 relative">
-                    <Quote className="absolute top-8 right-8 w-12 h-12 text-[#00ffff]/10" />
-                    <div className="flex flex-col items-center text-center">
-                      <p className="text-xl md:text-2xl text-white/90 italic mb-8 leading-relaxed">
-                        "{t.quote}"
-                      </p>
-                      <div>
-                        <h4 className="font-bold text-white text-lg">{t.author}</h4>
-                        <p className="text-[#00ffff] text-sm uppercase tracking-widest font-semibold">{t.role}</p>
+          <div className="relative max-w-4xl mx-auto">
+            <div className="overflow-hidden">
+              <motion.div 
+                className="flex"
+                animate={{ x: `-${currentIndex * 100}%` }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                {testimonials.map((t, i) => (
+                  <div key={i} className="min-w-full px-4">
+                    <div className="glass p-8 md:p-12 rounded-[2.5rem] border border-white/10 relative">
+                      <Quote className="absolute top-8 right-8 w-12 h-12 text-[#00ffff]/10" />
+                      <div className="flex flex-col items-center text-center">
+                        <p className="text-xl md:text-2xl text-white/90 italic mb-8 leading-relaxed">
+                          "{t.quote}"
+                        </p>
+                        <div>
+                          <h4 className="font-bold text-white text-lg">{t.author}</h4>
+                          <p className="text-[#00ffff] text-sm uppercase tracking-widest font-semibold">{t.role}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </motion.div>
-          </div>
+                ))}
+              </motion.div>
+            </div>
 
-          <div className="flex justify-center gap-4 mt-12">
-            <button 
-              onClick={prev}
-              className="w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center hover:bg-[#00ffff]/20 transition-all"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <button 
-              onClick={next}
-              className="w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center hover:bg-[#00ffff]/20 transition-all"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-          </div>
-          
-          <div className="flex justify-center gap-2 mt-6">
-            {testimonials.map((_, i) => (
+            <div className="flex justify-center gap-4 mt-12">
               <button 
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={`w-2 h-2 rounded-full transition-all ${currentIndex === i ? 'w-8 bg-[#00ffff]' : 'bg-white/20'}`}
-              />
-            ))}
+                onClick={prev}
+                className="w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center hover:bg-[#00ffff]/20 transition-all"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button 
+                onClick={next}
+                className="w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center hover:bg-[#00ffff]/20 transition-all"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="flex justify-center gap-2 mt-6">
+              {testimonials.map((_, i) => (
+                <button 
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  className={`w-2 h-2 rounded-full transition-all ${currentIndex === i ? 'w-8 bg-[#00ffff]' : 'bg-white/20'}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </FadeInParallax>
       </div>
     </section>
   );
@@ -1135,99 +1306,117 @@ const Feedback = () => {
   };
 
   return (
-    <section className="py-24 bg-[#0d0d0d]">
+    <section className="py-16 bg-[#000000] border-t border-white/5 relative">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
       <div className="max-w-4xl mx-auto px-6">
-        <div className="glass p-8 md:p-12 rounded-[3rem] border border-white/10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Share Your Experience</h2>
-            <p className="text-white/50">Your feedback helps us provide the best care possible.</p>
-          </div>
+        <FadeInParallax>
+          <motion.div 
+            className="glass p-8 md:p-12 rounded-[3rem] border transition-all duration-700"
+            initial={{ 
+              borderColor: "rgba(0, 255, 255, 0.3)", 
+              boxShadow: "0px 0px 15px rgba(0, 255, 255, 0.05)" 
+            }}
+            whileInView={{ 
+              borderColor: "rgba(0, 255, 255, 0.8)", 
+              boxShadow: "0px 0px 40px rgba(0, 255, 255, 0.3)" 
+            }}
+            whileHover={{ 
+              borderColor: "rgba(0, 255, 255, 1)", 
+              boxShadow: "0px 0px 60px rgba(0, 255, 255, 0.4)" 
+            }}
+            viewport={{ once: false, amount: 0.3 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Share Your Experience</h2>
+              <p className="text-white/50">Your feedback helps us provide the best care possible.</p>
+            </div>
 
-          {status === 'success' ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-12"
-            >
-              <CheckCircle2 className="w-16 h-16 text-[#00ffff] mx-auto mb-6" />
-              <h3 className="text-2xl font-bold mb-2">Thank You!</h3>
-              <p className="text-white/50">Your feedback has been sent successfully.</p>
-            </motion.div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Name</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#00ffff]/50 transition-colors"
-                    placeholder="Your name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Email (Optional)</label>
-                  <input 
-                    type="email" 
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#00ffff]/50 transition-colors"
-                    placeholder="your@email.com"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Rating</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setFormData({...formData, rating: star})}
-                      className="focus:outline-none"
-                    >
-                      <Star 
-                        className={`w-8 h-8 transition-colors ${formData.rating >= star ? 'text-[#00ffff] fill-[#00ffff]' : 'text-white/20'}`} 
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Your Experience</label>
-                <textarea 
-                  required
-                  rows={4}
-                  value={formData.message}
-                  onChange={(e) => setFormData({...formData, message: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#00ffff]/50 transition-colors resize-none"
-                  placeholder="Tell us about your treatment..."
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={status === 'loading'}
-                className="w-full py-5 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            {status === 'success' ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-12"
               >
-                {status === 'loading' ? 'Sending...' : (
-                  <>
-                    Send Feedback
-                    <Send className="w-5 h-5" />
-                  </>
+                <CheckCircle2 className="w-16 h-16 text-[#00ffff] mx-auto mb-6" />
+                <h3 className="text-2xl font-bold mb-2">Thank You!</h3>
+                <p className="text-white/50">Your feedback has been sent successfully.</p>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Name</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#00ffff]/50 transition-colors"
+                      placeholder="Your name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Email (Optional)</label>
+                    <input 
+                      type="email" 
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#00ffff]/50 transition-colors"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Rating</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFormData({...formData, rating: star})}
+                        className="focus:outline-none"
+                      >
+                        <Star 
+                          className={`w-8 h-8 transition-colors ${formData.rating >= star ? 'text-[#00ffff] fill-[#00ffff]' : 'text-white/20'}`} 
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white/60 mb-2 uppercase tracking-widest">Your Experience</label>
+                  <textarea 
+                    required
+                    rows={4}
+                    value={formData.message}
+                    onChange={(e) => setFormData({...formData, message: e.target.value})}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#00ffff]/50 transition-colors resize-none"
+                    placeholder="Tell us about your treatment..."
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={status === 'loading'}
+                  className="w-full py-5 bg-[#008080] hover:bg-[#00ffff] text-white hover:text-black font-bold rounded-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                >
+                  {status === 'loading' ? 'Sending...' : (
+                    <>
+                      Send Feedback
+                      <Send className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+                
+                {status === 'error' && (
+                  <p className="text-red-400 text-center text-sm">Something went wrong. Please try again.</p>
                 )}
-              </button>
-              
-              {status === 'error' && (
-                <p className="text-red-400 text-center text-sm">Something went wrong. Please try again.</p>
-              )}
-            </form>
-          )}
-        </div>
+              </form>
+            )}
+          </motion.div>
+        </FadeInParallax>
       </div>
     </section>
   );
@@ -1243,74 +1432,98 @@ const CTA = () => {
   const bgY = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
 
   return (
-    <section ref={ref} className="py-24">
+    <section ref={ref} className="py-16 bg-[#000000] border-t border-white/5 relative">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
       <div className="max-w-7xl mx-auto px-6">
-        <div className="relative rounded-[3rem] overflow-hidden p-12 md:p-24 text-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#008080] to-[#00ffff] opacity-90 z-0" />
-          <motion.div 
-            style={{ y: bgY, height: "140%", top: "-20%", left: 0, position: "absolute", width: "100%" }}
-            className="bg-[url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center mix-blend-overlay opacity-20 z-10"
-            aria-hidden="true"
-          />
-          <div className="relative z-20">
-            <h2 className="text-4xl md:text-6xl font-bold text-black mb-8">Ready to feel your best?</h2>
-            <p className="text-black/70 text-xl mb-12 max-w-xl mx-auto">
-              Book your first session today and get 20% off with code <span className="font-bold">FIRSTDRIP</span>
-            </p>
-            <a 
-              href="https://wa.me/573218210894"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-12 py-5 bg-black text-white font-bold rounded-full text-xl hover:scale-105 transition-transform shadow-2xl inline-block"
-            >
-              Book Your Session Now
-            </a>
+        <FadeInParallax>
+          <div className="relative rounded-[3rem] overflow-hidden p-12 md:p-24 text-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#008080] to-[#00ffff] opacity-90 z-0" />
+            <motion.div 
+              style={{ y: bgY, height: "140%", top: "-20%", left: 0, position: "absolute", width: "100%" }}
+              className="bg-[url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center mix-blend-overlay opacity-20 z-10"
+              aria-hidden="true"
+            />
+            <div className="relative z-20">
+              <h2 className="text-4xl md:text-6xl font-bold text-black mb-8">Ready to feel your best?</h2>
+              <p className="text-black/70 text-xl mb-12 max-w-xl mx-auto">
+                Book your first session today and get 20% off with code <span className="font-bold">FIRSTDRIP</span>
+              </p>
+              <a 
+                href="https://wa.me/573218210894"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-12 py-5 bg-black text-white font-bold rounded-full text-xl hover:scale-105 transition-transform shadow-2xl inline-block"
+              >
+                Book Your Session Now
+              </a>
+            </div>
           </div>
-        </div>
+        </FadeInParallax>
       </div>
     </section>
   );
 };
 
-const FAQItem = ({ faq, index, activeIndex, setActiveIndex }: { faq: any, index: number, activeIndex: number | null, setActiveIndex: (i: number | null) => void }) => {
-  const itemRef = React.useRef<HTMLDivElement>(null);
-  const isOpen = activeIndex === index;
+const faqs = [
+  {
+    question: "What payment methods do you accept?",
+    answer: "We accept Cash (USD or COP), Bancolombia bank transfers, Nequi, Bre-B, PayPal, and Venmo. Payment is typically made at the time of service."
+  },
+  {
+    question: "How do I book a session?",
+    answer: "Currently, all bookings are handled directly via WhatsApp. This allows for a quick medical pre-evaluation and direct coordination with our physicians. Just click any 'Book Now' button to start a chat with us."
+  },
+  {
+    question: "How do I know which drip is best for me?",
+    answer: "Our medical professionals are here to help. You can contact us via WhatsApp for a free pre-evaluation where our doctors will assess your condition and recommend the most suitable treatment for your needs."
+  },
+  {
+    question: "What is IV Therapy?",
+    answer: "IV Therapy is a medical treatment that delivers fluids, vitamins, and minerals directly into your bloodstream. This bypasses the digestive system for 100% absorption and immediate results."
+  },
+  {
+    question: "How long does a session take?",
+    answer: "Most sessions take between 45 to 60 minutes, depending on the specific drip and your individual needs. Our professionals will monitor you throughout the entire process."
+  },
+  {
+    question: "Is it safe?",
+    answer: "Yes, IV therapy is very safe when administered by trained medical professionals. We use high-quality ingredients and follow strict medical protocols to ensure your safety and comfort."
+  },
+  {
+    question: "Who performs the treatment?",
+    answer: "All our treatments are performed exclusively by licensed physicians who specialize in IV administration, ensuring the highest level of medical expertise."
+  },
+  {
+    question: "How quickly will I feel the effects?",
+    answer: "Many clients report feeling an immediate boost in energy and hydration. Depending on the drip, full effects are typically felt within a few hours and can last for several days."
+  }
+];
 
-  useEffect(() => {
-    if (isOpen && itemRef.current) {
-      const timer = setTimeout(() => {
-        itemRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
-        });
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
+const FAQItem = React.memo(({ faq, index, activeIndex, setActiveIndex }: { faq: any, index: number, activeIndex: number | null, setActiveIndex: (i: number | null) => void }) => {
+  const isOpen = activeIndex === index;
 
   return (
     <motion.div
-      ref={itemRef}
+      layout
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.1 }}
-      whileHover={{ 
-        scale: 1.01,
-        borderColor: "rgba(0, 255, 255, 0.3)",
-        boxShadow: "0 0 30px rgba(0, 255, 255, 0.05)"
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ 
+        duration: 0.4,
+        delay: Math.min(index * 0.05, 0.3),
+        ease: [0.16, 1, 0.3, 1]
       }}
-      className={`border rounded-2xl overflow-hidden backdrop-blur-sm transition-all duration-500 ${
+      className={`border rounded-2xl overflow-hidden backdrop-blur-sm transition-colors duration-300 ${
         isOpen 
           ? 'bg-white/[0.08] border-[#00ffff]/40 shadow-[0_0_40px_rgba(0,255,255,0.1)]' 
-          : 'bg-white/[0.03] border-white/10'
+          : 'bg-white/[0.03] border-white/10 hover:border-white/20'
       }`}
     >
       <button
         onClick={() => setActiveIndex(isOpen ? null : index)}
-        className="w-full px-6 py-6 text-left flex items-center justify-between group transition-all duration-500"
+        className="w-full px-6 py-6 text-left flex items-center justify-between group"
       >
-        <span className={`font-semibold text-lg pr-8 transition-colors duration-500 ${
+        <span className={`font-semibold text-lg pr-8 transition-colors duration-300 ${
           isOpen ? 'text-[#00ffff]' : 'text-white/80 group-hover:text-white'
         }`}>
           {faq.question}
@@ -1318,22 +1531,23 @@ const FAQItem = ({ faq, index, activeIndex, setActiveIndex }: { faq: any, index:
         <motion.div
           animate={{ 
             rotate: isOpen ? 90 : 0,
-            scale: isOpen ? 1.2 : 1,
+            scale: isOpen ? 1.1 : 1,
             color: isOpen ? "#00ffff" : "rgba(255, 255, 255, 0.4)"
           }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#00ffff]/10 transition-colors"
         >
           <ChevronRight className="w-5 h-5" />
         </motion.div>
       </button>
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
+            key="content"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="px-6 pb-6 text-white/60 leading-relaxed border-t border-white/5 pt-4 mx-6 mb-2">
               {faq.answer}
@@ -1343,70 +1557,33 @@ const FAQItem = ({ faq, index, activeIndex, setActiveIndex }: { faq: any, index:
       </AnimatePresence>
     </motion.div>
   );
-};
+});
 
 const FAQ = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const faqs = [
-    {
-      question: "What payment methods do you accept?",
-      answer: "We accept Cash (USD or COP), Bancolombia bank transfers, Nequi, Bre-B, and PayPal. Payment is typically made at the time of service."
-    },
-    {
-      question: "How do I book a session?",
-      answer: "Currently, all bookings are handled directly via WhatsApp. This allows for a quick medical pre-evaluation and direct coordination with our physicians. Just click any 'Book Now' button to start a chat with us."
-    },
-    {
-      question: "How do I know which drip is best for me?",
-      answer: "Our medical professionals are here to help. You can contact us via WhatsApp for a free pre-evaluation where our doctors will assess your condition and recommend the most suitable treatment for your needs."
-    },
-    {
-      question: "What is IV Therapy?",
-      answer: "IV Therapy is a medical treatment that delivers fluids, vitamins, and minerals directly into your bloodstream. This bypasses the digestive system for 100% absorption and immediate results."
-    },
-    {
-      question: "How long does a session take?",
-      answer: "Most sessions take between 45 to 60 minutes, depending on the specific drip and your individual needs. Our professionals will monitor you throughout the entire process."
-    },
-    {
-      question: "Is it safe?",
-      answer: "Yes, IV therapy is very safe when administered by trained medical professionals. We use high-quality ingredients and follow strict medical protocols to ensure your safety and comfort."
-    },
-    {
-      question: "Who performs the treatment?",
-      answer: "All our treatments are performed exclusively by licensed physicians who specialize in IV administration, ensuring the highest level of medical expertise."
-    },
-    {
-      question: "How quickly will I feel the effects?",
-      answer: "Many clients report feeling an immediate boost in energy and hydration. Depending on the drip, full effects are typically felt within a few hours and can last for several days."
-    }
-  ];
-
   return (
-    <section id="faqs" className="py-24 relative overflow-hidden bg-white/[0.02]">
+    <section id="faqs" className="py-16 relative overflow-hidden bg-[#000000] border-t border-white/5">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#00ffff]/40 to-transparent" />
       <div className="max-w-3xl mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">FAQs</h2>
-          <p className="text-white/60 text-lg">Everything you need to know about our services.</p>
-        </motion.div>
+        <FadeInParallax>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">FAQs</h2>
+            <p className="text-white/60 text-lg">Everything you need to know about our services.</p>
+          </div>
 
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <FAQItem 
-              key={index} 
-              faq={faq} 
-              index={index} 
-              activeIndex={activeIndex} 
-              setActiveIndex={setActiveIndex} 
-            />
-          ))}
-        </div>
+          <motion.div layout className="space-y-4">
+            {faqs.map((faq, index) => (
+              <FAQItem 
+                key={index} 
+                faq={faq} 
+                index={index} 
+                activeIndex={activeIndex} 
+                setActiveIndex={setActiveIndex} 
+              />
+            ))}
+          </motion.div>
+        </FadeInParallax>
       </div>
     </section>
   );
@@ -1414,7 +1591,7 @@ const FAQ = () => {
 
 const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') => void }) => {
   return (
-    <footer id="contact" className="py-20 border-t border-white/5">
+    <footer id="contact" className="py-20 border-t border-white/5 bg-[#000000]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-2">
@@ -1530,11 +1707,28 @@ const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') =>
 import { Chatbot } from './components/Chatbot';
 import Links from './pages/Links';
 
+const ScrollProgress = () => {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  return (
+    <motion.div
+      className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#008080] to-[#00ffff] origin-left z-[100] shadow-[0_0_10px_rgba(0,255,255,0.3)]"
+      style={{ scaleX }}
+    />
+  );
+};
+
 function HomePage() {
   const [policyType, setPolicyType] = useState<'privacy' | 'terms' | null>(null);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#000000]">
+      <ScrollProgress />
       <Navbar />
       <main>
         <Hero />

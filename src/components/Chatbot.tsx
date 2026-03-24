@@ -198,10 +198,10 @@ export const Chatbot = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 w-[350px] h-[500px] max-h-[80vh] bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
+            className="fixed bottom-6 right-6 w-[350px] h-[500px] max-h-[80vh] bg-black border border-white/10 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
           >
             {/* Header */}
-            <div className="p-4 bg-[#0a0a0a] border-b border-white/10 flex items-center justify-between">
+            <div className="p-4 bg-black border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-[#00ffff]/20 flex items-center justify-center">
                   <Bot className="w-5 h-5 text-[#00ffff]" />
@@ -316,7 +316,7 @@ export const Chatbot = () => {
             </div>
 
             {/* Input */}
-            <form onSubmit={handleSubmit} className="p-4 bg-[#0a0a0a] border-t border-white/10">
+            <form onSubmit={handleSubmit} className="p-4 bg-black border-t border-white/10">
               <div className="relative">
                 <input
                   type="text"
