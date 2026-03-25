@@ -353,7 +353,6 @@ const Features = () => {
 
   const [isMobile, setIsMobile] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const cardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -370,8 +369,9 @@ const Features = () => {
       const sectionRect = ref.current.getBoundingClientRect();
       // Only calculate if section is in view
       if (sectionRect.top < window.innerHeight && sectionRect.bottom > 0) {
-        // Target the bottom 3/4 of the screen
-        const targetY = window.innerHeight * 0.75;
+        // Target Y is the point on screen where we want the illumination to trigger
+        // Using a point around the middle of the screen
+        const targetY = window.innerHeight * 0.5;
         let closestIndex = -1;
         let minDistance = Infinity;
 
@@ -388,11 +388,10 @@ const Features = () => {
           }
         });
 
-        // Only illuminate if the closest card is reasonably near the target point
-        if (minDistance < window.innerHeight * 0.4) {
+        // Always set the closest index if we are within the section's active range
+        // This ensures sequential activation as we scroll
+        if (closestIndex !== -1) {
           setActiveIndex(closestIndex);
-        } else {
-          setActiveIndex(null);
         }
       } else {
         setActiveIndex(null);
@@ -404,8 +403,6 @@ const Features = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
-
   return (
     <section ref={ref} className="py-16 bg-[#000000] relative overflow-hidden">
       
@@ -413,13 +410,11 @@ const Features = () => {
         <FadeInParallax>
           <div className="grid md:grid-cols-3 gap-12">
             {features.map((f, i) => {
-              const isIlluminated = currentIlluminatedIndex === i;
+              const isIlluminated = activeIndex === i;
               return (
               <motion.div 
                 key={i}
                 ref={(el) => { cardRefs.current[i] = el; }}
-                onMouseEnter={() => setHoveredIndex(i)}
-                onMouseLeave={() => setHoveredIndex(null)}
                 style={{ y: isMobile ? 0 : yTransforms[i] }}
                 initial={{ 
                   opacity: 0.3, 
@@ -448,7 +443,7 @@ const Features = () => {
                 }}
                 viewport={{ once: false, amount: 0.4 }}
                 transition={{ duration: 0.2 }}
-                className={`p-8 rounded-3xl glass transition-all duration-200 border ${isIlluminated ? 'opacity-100' : 'opacity-60'}`}
+                className={`p-8 rounded-3xl glass transition-all duration-200 border select-none ${isIlluminated ? 'opacity-100' : 'opacity-60'}`}
               >
                 <div className={`w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] transition-all duration-200 ${isIlluminated ? 'scale-110 shadow-[0_0_20px_rgba(0,255,255,0.4)]' : ''}`}>
                   {f.icon}
@@ -998,7 +993,6 @@ const HowItWorks = () => {
 
   const ref = React.useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const itemRefs = React.useRef<(HTMLDivElement | null)[]>([]);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -1016,7 +1010,9 @@ const HowItWorks = () => {
       const sectionRect = ref.current.getBoundingClientRect();
       // Only calculate if section is in view
       if (sectionRect.top < window.innerHeight && sectionRect.bottom > 0) {
-        const targetY = isMobile ? window.innerHeight * 0.75 : window.innerHeight / 2;
+        // Target Y is the point on screen where we want the illumination to trigger
+        // Using a slightly higher point than center for better feel when scrolling down
+        const targetY = isMobile ? window.innerHeight * 0.6 : window.innerHeight * 0.5;
         let closestIndex = -1;
         let minDistance = Infinity;
 
@@ -1033,10 +1029,10 @@ const HowItWorks = () => {
           }
         });
 
-        if (minDistance < window.innerHeight * (isMobile ? 0.3 : 0.5)) {
+        // Always set the closest index if we are within the section's active range
+        // This ensures sequential activation as we scroll
+        if (closestIndex !== -1) {
           setActiveIndex(closestIndex);
-        } else {
-          setActiveIndex(null);
         }
       } else {
         setActiveIndex(null);
@@ -1047,8 +1043,6 @@ const HowItWorks = () => {
     handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isMobile]);
-
-  const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
 
   return (
     <section ref={ref} id="how-it-works" className="py-16 bg-[#000000] relative border-t border-white/5">
@@ -1061,13 +1055,11 @@ const HowItWorks = () => {
         </FadeInParallax>
         <div className="max-w-3xl mx-auto space-y-12">
           {steps.map((step, i) => {
-            const isIlluminated = currentIlluminatedIndex === i;
+            const isIlluminated = activeIndex === i;
             return (
             <motion.div 
               key={i}
               ref={(el) => { itemRefs.current[i] = el; }}
-              onMouseEnter={() => setHoveredIndex(i)}
-              onMouseLeave={() => setHoveredIndex(null)}
               initial={{ opacity: 0.3, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: false, amount: 0.6 }}
@@ -1075,8 +1067,8 @@ const HowItWorks = () => {
                 opacity: isIlluminated ? 1 : 0.5,
                 x: isIlluminated ? 10 : 0
               }}
-              transition={{ duration: 0.3 }}
-              className="flex gap-6 group cursor-pointer"
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="flex gap-6 select-none"
             >
                   <motion.span 
                     animate={{
@@ -1084,8 +1076,8 @@ const HowItWorks = () => {
                       textShadow: isIlluminated ? "0 0 25px rgba(0, 255, 255, 0.8)" : "0 0 0px rgba(0, 255, 255, 0)",
                       scale: isIlluminated ? 1.15 : 1
                     }}
-                    transition={{ duration: 0.3 }}
-                    className="text-4xl font-serif italic font-bold transition-all duration-300"
+                    transition={{ duration: 0.2 }}
+                    className="text-4xl font-serif italic font-bold transition-all duration-200"
                   >
                     {step.num}
                   </motion.span>
@@ -1095,8 +1087,8 @@ const HowItWorks = () => {
                         color: isIlluminated ? "#00ffff" : "#ffffff",
                         textShadow: isIlluminated ? "0 0 20px rgba(0, 255, 255, 0.6)" : "0 0 0px rgba(0, 255, 255, 0)"
                       }}
-                      transition={{ duration: 0.3 }}
-                      className="text-xl font-bold mb-2 transition-colors duration-300"
+                      transition={{ duration: 0.2 }}
+                      className="text-xl font-bold mb-2 transition-colors duration-200"
                     >
                       {step.title}
                     </motion.h3>
@@ -1104,8 +1096,8 @@ const HowItWorks = () => {
                       animate={{
                         color: isIlluminated ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 255, 255, 0.4)"
                       }}
-                      transition={{ duration: 0.3 }}
-                      className="transition-colors duration-300"
+                      transition={{ duration: 0.2 }}
+                      className="transition-colors duration-200"
                     >
                       {step.desc}
                     </motion.p>
@@ -1146,8 +1138,8 @@ const TeamLeaders = () => {
     const handleScroll = () => {
       if (!ref.current) return;
       
-      const targetY = window.innerHeight * 0.75;
-      let closestIndex = -1;
+      const targetY = window.innerHeight / 2;
+      let closestIndex = 0;
       let minDistance = Infinity;
 
       cardRefs.current.forEach((card, index) => {
@@ -1162,12 +1154,7 @@ const TeamLeaders = () => {
           }
         }
       });
-
-      if (minDistance < window.innerHeight * 0.4) {
-        setScrollIlluminatedIndex(closestIndex);
-      } else {
-        setScrollIlluminatedIndex(null);
-      }
+      setScrollIlluminatedIndex(closestIndex);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -1227,8 +1214,11 @@ const TeamLeaders = () => {
         <div className="flex flex-col lg:flex-row gap-4 h-[600px] lg:h-[500px]">
           {leaders.map((leader, i) => {
               const isActive = activeIndex === i;
-              const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : scrollIlluminatedIndex;
-              const isIlluminated = isActive || currentIlluminatedIndex === i;
+              // Priority: Expanded Card > Hovered Card > Scrolled Card
+              const currentIlluminatedIndex = activeIndex !== null 
+                ? activeIndex 
+                : (hoveredIndex !== null ? hoveredIndex : scrollIlluminatedIndex);
+              const isIlluminated = currentIlluminatedIndex === i;
               
               return (
                 <motion.div
@@ -1240,7 +1230,10 @@ const TeamLeaders = () => {
                   animate={{ 
                     flex: isActive ? 3 : 1,
                     boxShadow: isIlluminated ? "0 0 60px rgba(0, 255, 255, 0.15)" : "none",
-                    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                    transition: { 
+                      flex: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+                      boxShadow: { duration: 0.3 }
+                    }
                   }}
                   onClick={() => {
                     const newIndex = activeIndex === i ? null : i;
@@ -1251,7 +1244,7 @@ const TeamLeaders = () => {
                       }, 300);
                     }
                   }}
-                  className={`relative rounded-[2.5rem] overflow-hidden cursor-pointer group border border-white/10 transition-colors duration-500 ${
+                  className={`relative rounded-[2.5rem] overflow-hidden cursor-pointer group border border-white/10 transition-colors duration-300 ${
                     isIlluminated ? 'border-[#00ffff]/30' : 'hover:border-white/20'
                   }`}
                 >
@@ -1260,7 +1253,7 @@ const TeamLeaders = () => {
                     <motion.img 
                       src={leader.image} 
                       alt={leader.name}
-                      className={`absolute inset-0 w-full h-[130%] -top-[15%] object-cover transition-[filter,opacity] duration-1000 ${
+                      className={`absolute inset-0 w-full h-[130%] -top-[15%] object-cover transition-[filter,opacity] duration-500 ${
                         isIlluminated 
                           ? `grayscale-0 opacity-100 ${isActive ? 'blur-[3px]' : 'blur-0'}` 
                           : 'grayscale opacity-40 group-hover:opacity-60 blur-0'
@@ -1291,7 +1284,7 @@ const TeamLeaders = () => {
                   )}
                   
                   {/* Overlay */}
-                  <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent transition-opacity duration-500 ${
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent transition-opacity duration-300 ${
                     isIlluminated ? 'opacity-90' : 'opacity-70'
                   }`} />
 
@@ -1306,7 +1299,7 @@ const TeamLeaders = () => {
                       <p className="text-[#00ffff] text-xs uppercase tracking-[0.2em] font-bold mb-2">
                         {leader.role}
                       </p>
-                      <h3 className={`text-2xl md:text-3xl font-bold mb-4 transition-all duration-500 ${
+                      <h3 className={`text-2xl md:text-3xl font-bold mb-4 transition-all duration-300 ${
                         isIlluminated ? 'text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.4)]' : 'text-white/80'
                       }`}>
                         {leader.name}
