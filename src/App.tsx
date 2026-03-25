@@ -424,9 +424,7 @@ const Features = () => {
                 style={{ y: isMobile ? 0 : yTransforms[i] }}
                 initial={{ 
                   opacity: 0.3, 
-                  y: 20,
-                  borderColor: "rgba(255, 255, 255, 0.05)",
-                  boxShadow: "0px 0px 0px rgba(0, 255, 255, 0)"
+                  y: 20
                 }}
                 whileInView={{ 
                   opacity: 1, 
@@ -442,16 +440,11 @@ const Features = () => {
                     }
                   } : {})
                 }}
-                animate={{
-                  borderColor: isIlluminated ? "rgba(0, 255, 255, 1)" : "rgba(255, 255, 255, 0.05)",
-                  boxShadow: isIlluminated ? "0px 0px 50px rgba(0, 255, 255, 0.3)" : "0px 0px 0px rgba(0, 255, 255, 0)",
-                  scale: isIlluminated ? 1.02 : 1
-                }}
                 viewport={{ once: false, amount: 0.4 }}
                 transition={{ duration: 0.2 }}
-                className={`p-8 rounded-3xl glass transition-all duration-200 border select-none ${isIlluminated ? 'opacity-100' : 'opacity-60'} ${!isMobile ? 'cursor-pointer' : ''}`}
+                className={`p-8 rounded-3xl glass transition-all duration-200 border border-white/5 select-none ${!isMobile ? 'cursor-pointer' : ''}`}
               >
-                <div className={`w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] transition-all duration-200 ${isIlluminated ? 'scale-110 shadow-[0_0_20px_rgba(0,255,255,0.4)]' : ''}`}>
+                <div className={`w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] transition-all duration-300 ${isIlluminated ? 'scale-110 shadow-[0_0_30px_rgba(0,255,255,0.6)] bg-[#008080]/20' : 'opacity-60'}`}>
                   {f.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
