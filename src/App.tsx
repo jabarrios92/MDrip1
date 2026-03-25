@@ -353,6 +353,7 @@ const Features = () => {
 
   const [isMobile, setIsMobile] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const cardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -364,7 +365,10 @@ const Features = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!ref.current) return;
+      if (!ref.current || !isMobile) {
+        if (!isMobile) setActiveIndex(null);
+        return;
+      }
       
       const sectionRect = ref.current.getBoundingClientRect();
       // Only calculate if section is in view
@@ -401,7 +405,7 @@ const Features = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMobile]);
 
   return (
     <section ref={ref} className="py-16 bg-[#000000] relative overflow-hidden">
@@ -410,11 +414,13 @@ const Features = () => {
         <FadeInParallax>
           <div className="grid md:grid-cols-3 gap-12">
             {features.map((f, i) => {
-              const isIlluminated = activeIndex === i;
+              const isIlluminated = isMobile ? activeIndex === i : hoveredIndex === i;
               return (
               <motion.div 
                 key={i}
                 ref={(el) => { cardRefs.current[i] = el; }}
+                onMouseEnter={() => !isMobile && setHoveredIndex(i)}
+                onMouseLeave={() => !isMobile && setHoveredIndex(null)}
                 style={{ y: isMobile ? 0 : yTransforms[i] }}
                 initial={{ 
                   opacity: 0.3, 
@@ -443,7 +449,7 @@ const Features = () => {
                 }}
                 viewport={{ once: false, amount: 0.4 }}
                 transition={{ duration: 0.2 }}
-                className={`p-8 rounded-3xl glass transition-all duration-200 border select-none ${isIlluminated ? 'opacity-100' : 'opacity-60'}`}
+                className={`p-8 rounded-3xl glass transition-all duration-200 border select-none ${isIlluminated ? 'opacity-100' : 'opacity-60'} ${!isMobile ? 'cursor-pointer' : ''}`}
               >
                 <div className={`w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] transition-all duration-200 ${isIlluminated ? 'scale-110 shadow-[0_0_20px_rgba(0,255,255,0.4)]' : ''}`}>
                   {f.icon}
