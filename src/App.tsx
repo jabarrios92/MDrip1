@@ -166,11 +166,22 @@ const Hero = () => {
   const ref = React.useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const btnRefs = React.useRef<(HTMLAnchorElement | null)[]>([]);
 
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => {
-      if (!ref.current) return;
+      if (!ref.current || !isMobile) {
+        if (!isMobile) setActiveIndex(null);
+        return;
+      }
       
       const sectionRect = ref.current.getBoundingClientRect();
       if (sectionRect.top < window.innerHeight && sectionRect.bottom > 0) {
@@ -191,7 +202,8 @@ const Hero = () => {
           }
         });
 
-        if (minDistance < 250) {
+        // Tighter threshold for quick activation/deactivation (100px from center)
+        if (minDistance < 100) {
           setActiveIndex(closestIndex);
         } else {
           setActiveIndex(null);
@@ -204,7 +216,7 @@ const Hero = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMobile]);
 
   const currentIlluminatedIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
 
@@ -302,8 +314,15 @@ const Hero = () => {
             Book Now
           </a>
           <a 
+            ref={(el) => { btnRefs.current[1] = el; }}
+            onMouseEnter={() => setHoveredIndex(1)}
+            onMouseLeave={() => setHoveredIndex(null)}
             href="#how-it-works"
-            className="w-full sm:w-auto px-10 py-4 glass font-bold rounded-full transition-all duration-300 text-lg text-center text-white border-white/10 hover:bg-white/10 hover:border-white/20"
+            className={`w-full sm:w-auto px-10 py-4 glass font-bold rounded-full transition-all duration-300 text-lg text-center active:scale-95 ${
+              currentIlluminatedIndex === 1
+                ? 'bg-white/10 shadow-[0_0_20px_rgba(0,255,255,0.4)] border-[#00ffff]/50 text-[#00ffff] scale-105'
+                : 'text-white border-white/10 hover:bg-white/10 hover:border-[#00ffff]/50 hover:text-[#00ffff] hover:scale-105 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)]'
+            }`}
           >
             How it Works
           </a>
@@ -439,7 +458,7 @@ const Features = () => {
                 transition={{ duration: 0.2 }}
                 className={`p-8 rounded-3xl glass transition-all duration-200 border border-white/5 select-none ${!isMobile ? 'cursor-pointer' : ''}`}
               >
-                <div className={`w-16 h-16 bg-[#008080]/10 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] transition-all duration-300 ${isIlluminated ? 'scale-110 shadow-[0_0_30px_rgba(0,255,255,0.6)] bg-[#008080]/20' : 'opacity-60'}`}>
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-[#00ffff] transition-all duration-500 ${isIlluminated ? 'scale-110 opacity-100 drop-shadow-[0_0_10px_rgba(0,255,255,0.8)]' : 'opacity-30'}`}>
                   {f.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
