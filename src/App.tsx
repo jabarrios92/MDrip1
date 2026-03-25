@@ -302,15 +302,8 @@ const Hero = () => {
             Book Now
           </a>
           <a 
-            ref={(el) => { btnRefs.current[1] = el; }}
-            onMouseEnter={() => setHoveredIndex(1)}
-            onMouseLeave={() => setHoveredIndex(null)}
             href="#how-it-works"
-            className={`w-full sm:w-auto px-10 py-4 glass font-bold rounded-full transition-all duration-300 text-lg text-center ${
-              currentIlluminatedIndex === 1
-                ? 'bg-white/10 shadow-[0_0_20px_rgba(0,255,255,0.4)] border-[#00ffff]/50 text-[#00ffff] scale-105'
-                : 'text-white border-transparent'
-            }`}
+            className="w-full sm:w-auto px-10 py-4 glass font-bold rounded-full transition-all duration-300 text-lg text-center text-white border-white/10 hover:bg-white/10 hover:border-white/20"
           >
             How it Works
           </a>
@@ -392,10 +385,12 @@ const Features = () => {
           }
         });
 
-        // Always set the closest index if we are within the section's active range
-        // This ensures sequential activation as we scroll
-        if (closestIndex !== -1) {
+        // Only illuminate if the closest card is actually near the center
+        // This prevents the first card from being lit while still at the bottom
+        if (minDistance < window.innerHeight * 0.3) {
           setActiveIndex(closestIndex);
+        } else {
+          setActiveIndex(null);
         }
       } else {
         setActiveIndex(null);
