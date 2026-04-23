@@ -1892,7 +1892,7 @@ const Footer = ({ onOpenPolicy }: { onOpenPolicy: (type: 'privacy' | 'terms') =>
 };
 
 
-import { Chatbot } from './components/Chatbot';
+import { WhatsappButton } from './components/WhatsappButton';
 import Links from './pages/Links';
 
 const ScrollProgress = () => {
@@ -1932,7 +1932,7 @@ function HomePage() {
         <CTA />
       </main>
       <Footer onOpenPolicy={(type) => setPolicyType(type)} />
-      <Chatbot />
+      <WhatsappButton />
       
       <AnimatePresence>
         {policyType && (
