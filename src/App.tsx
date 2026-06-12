@@ -279,7 +279,7 @@ const Hero = () => {
           transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-tight"
         >
-          Premium IV Therapy <br />
+          Premium Medical Care <br />
           <span className="text-gradient italic font-serif">At Your Doorstep</span>
         </motion.h1>
 
